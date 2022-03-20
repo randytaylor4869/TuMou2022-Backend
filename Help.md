@@ -1,4 +1,4 @@
-## Operation类说明
+# Operation类说明
 Operation是每回合玩家返回的操作
 
 int type 操作类型：
@@ -14,9 +14,9 @@ int upgrade_type 升级类型：
 Operation 默认不进行移动、攻击或升级
 
 
-## Game类说明
+# Game类说明
 
-# 成员变量
+## 成员变量
 
 Map map 游戏地图信息
 
@@ -24,7 +24,7 @@ Player player_red, player_blue 双方玩家
 
 int turn 当前回合数
 
-# 成员函数
+## 成员函数
 
 Operation regulate(Operation op, Player p)
 检查玩家操作是否合法。输入代表玩家p给出了op操作，若op操作合法则返回op，否则返回不进行任何动作的操作。
@@ -48,9 +48,9 @@ g.检查双方玩家是否存活
 int proc()
 对局入口，每回合调用Update()，最终返回赢家id(red = 0, blue = 1)
 
-## Player类说明
+# Player类说明
 
-# 成员变量
+## 成员变量
 
 int id 玩家id：0-红方 1-蓝方
 
@@ -66,9 +66,9 @@ int hp; 血量
 
 int mines; 采集到的资源(用于升级)
 
-## Map类说明
+# Map类说明
 
-# 成员变量
+## 成员变量
 
 Point data[][][] 地图信息（采用六边形地图，三个坐标）
 
@@ -87,7 +87,7 @@ int barrier_num 障碍物数量
 
 int enemy_num （视野内）敌人数量
 
-# 成员函数
+## 成员函数
 
 bool isValid(int x, int y, int z)
 bool isValid(Coordinate c)
