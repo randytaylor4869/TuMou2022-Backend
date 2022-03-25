@@ -77,6 +77,7 @@ public:
 	std::vector<Coordinate> barrier;
 	std::vector<Player> enemy_unit;
 	int nowSize = MAP_SIZE;			//当前毒圈的边长
+	int viewSize = MAP_SIZE;
 	int mine_num = 0;
 	int barrier_num = 0;
 	int enemy_num = 0;
@@ -124,10 +125,11 @@ public:
 	Map(Map totalmap, const Player& p)			//返回玩家p的视野地图,传递给选手		
 	{
 		*this = totalmap;
-		nowSize = p.sight_range;
+		viewSize = p.sight_range;
 		for (auto i : totalmap.mine)
 		{
-			if (getDistance(p.pos, i.pos) <= nowSize - 1)
+
+			if (getDistance(p.pos, i.pos) <= viewSize - 1)
 			{
 				mine.push_back(i);
 				data[i.pos.x][i.pos.y][i.pos.z].MineIdx = mine_num++;
@@ -135,7 +137,7 @@ public:
 		}
 		for (auto i : totalmap.barrier)
 		{
-			if (getDistance(p.pos, i) <= nowSize - 1)
+			if (getDistance(p.pos, i) <= viewSize - 1)
 			{
 				barrier.push_back(i);
 				data[i.x][i.y][i.z].BarrierIdx = barrier_num++;
@@ -143,7 +145,7 @@ public:
 		}
 		for (auto i : totalmap.enemy_unit)
 		{
-			if (getDistance(p.pos, i.pos) <= nowSize - 1)
+			if (getDistance(p.pos, i.pos) <= viewSize - 1)
 			{
 				enemy_unit.push_back(i);
 				data[i.pos.x][i.pos.y][i.pos.z].PlayerIdx = i.id;

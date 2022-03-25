@@ -8,6 +8,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <ctime>
+#include <vector>
 
 const int UPGRADE_COST[6] = { 100, 100, 100, 100, 100, 100}; // todo：确定升级类型所需要的mine数
 
@@ -35,6 +36,9 @@ class Game
     Map map;
 	Player player_red=Player(0,MAP_SIZE-1,2*MAP_SIZE-2,0);    
 	Player player_blue=Player(1,MAP_SIZE,0,2*MAP_SIZE-2);
+	map.enemy_unit.push_back(&player_red);
+	map.enemy_unit.push_back(&player_blue);
+	map.enemy_num+=2;
 	//to do: 更改player初始位置
     // Player ai[2];
     int turn;
@@ -171,7 +175,19 @@ public:
         if(op.type == 0)
         {
             player_red.pos = op.target;
-        }
+			for (auto i : map.enemy_unit)
+			{
+				if (i.id !=player_red.id )
+				{
+					continue;
+				}
+				else
+				{
+					i.pos = player_red.pos;
+					break;
+				}
+			}
+{        }
         //更新攻击相关（血量）
         else if(op.type == 1)
         {
@@ -204,6 +220,18 @@ public:
         if(op.type == 0)
         {
             player_blue.pos = op.target;
+			for (auto i : map.enemy_unit)
+			{
+				if (i.id != player_blue.id)
+				{
+					continue;
+				}
+				else
+				{
+					i.pos = player_blue.pos;
+					break;
+				}
+			}
         }
         //更新攻击相关（血量）
         else if(op.type == 1)
@@ -225,8 +253,8 @@ public:
         }
 
         //判断存活状态
-        if(player_red.hp <= 0)
-            return true;
+		if (player_red.hp <= 0)
+			return true;
 
         //缩圈
         if(turn >= 0.75 * TURN_COUNT && turn % 5 == 0)
