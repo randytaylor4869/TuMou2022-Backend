@@ -52,9 +52,9 @@ class Game
     //    return map;
     //}
 
-	Map limited_map = Map(map,player_red);		//返回玩家p的视野地图
+	//Map limited_map = Map(map,player_red);		//返回玩家p的视野地图
 
-    Operation regulate(Operation op, Player p)
+    Operation regulate(Operation op, const Player& p)
     {
         Operation ret;
         //若不合法，一律返回什么都不做none(-1)
@@ -127,11 +127,8 @@ class Game
         }
     }
 public:
-    Game(unsigned int seed = 0)
+    Game()
     {
-        if(seed == 0)
-            seed = srand(time(0));
-        
         turn = 0;
         init_map();
 
@@ -168,7 +165,7 @@ public:
         // get operation from player red(0)
         //op = get_operation_red(player_red, limited_map(player_red));
 		op = get_operation_red(player_red, Map(map,player_red));
-        op = regulate(op);
+        op = regulate(op,player_red);
         // todo: REPLAY 输出op red
         //更新移动相关（位置）
         if(op.type == 0)
@@ -200,8 +197,8 @@ public:
 
 
         // get operation from player blue(1)
-        op = get_operation_blue(player_red, limited_map(player_blue));
-        op = regulate(op);
+        op = get_operation_blue(player_red, Map(map,player_blue));
+        op = regulate(op,player_blue);
         // todo: REPLAY 输出op blue
         //更新移动相关（位置）
         if(op.type == 0)
