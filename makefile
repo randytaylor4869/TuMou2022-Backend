@@ -3,11 +3,11 @@ header = $(wildcar *.h)
 
 all: main1 main2
 
-main1: TuMou_2022.cpp $(header) 
-	g++ $< player0_red.o player1_blue.o -o $@
+main1: TuMou_2022.cpp player0_red.o player1_blue.o $(header) 
+	g++ TuMou_2022.cpp player0_red.o player1_blue.o -o $@
 	
-main2: TuMou_2022.cpp $(header) 
-	g++ $< player0_blue.o player1_red.o -o $@
+main2: TuMou_2022.cpp player0_blue.o player1_red.o $(header) 
+	g++ TuMou_2022.cpp player0_blue.o player1_red.o -o $@
 
 player0_red.o: player0.cpp $(header)
 	g++ -c -D __PLAYER_RED__ -o $@ $<
