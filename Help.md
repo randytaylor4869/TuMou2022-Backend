@@ -33,7 +33,7 @@ Operation regulate(Operation op, Player p)
 void upgrade(int type, Player& p)  
 更新玩家p合法的升级。  
 type代表升级类型：
-    0-移动速度， 1-攻击力， 2-采集速度， 3-回血，4-视野，5-生命值。
+    0-移动速度， 1-攻击范围， 2-采集速度， 3-回血，4-视野，5-攻击力。
 
 bool Update()  
 进行一个回合，流程如下：  
