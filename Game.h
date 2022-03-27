@@ -258,6 +258,12 @@ public:
         //op = get_operation_red(player_red, limited_map(player_red));
 		op = get_operation_red(player_red, Map(map,player_red));
         op = regulate(op,player_red);
+        if (op.type == -1)
+        {
+            Json::Value event = reportEvent(0, player_red.pos);
+            event["CurrentEvent"] = "ERROR";
+            m_root.append(event);
+        }
         // todo: REPLAY 输出op red
 
         //更新移动相关（位置）
@@ -337,6 +343,12 @@ public:
         // get operation from player blue(1)
         op = get_operation_blue(player_red, Map(map,player_blue));
         op = regulate(op,player_blue);
+        if (op.type == -1)
+        {
+            Json::Value event = reportEvent(0, player_red.pos);
+            event["CurrentEvent"] = "ERROR";
+            m_root.append(event);
+        }
         // todo: REPLAY 输出op blue
         //更新移动相关（位置）
         if(op.type == 0)
