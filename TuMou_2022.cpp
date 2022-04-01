@@ -2,12 +2,22 @@
 //
 
 #include"Game.h"
+// #include "Player.h"
+#include "player0.cpp"
+#include "player1.cpp"
 
 #include <iostream>
 
+Game game;
+
 int main()
 {
-    std::cout << "Hello World!\n";
+    bool flag = false;
+    while(!flag)
+    {
+        flag = game.Update();
+    }
+    return 0;
 }
 
 
