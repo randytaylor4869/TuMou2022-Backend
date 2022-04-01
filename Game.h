@@ -37,9 +37,11 @@ class Game
     Map map;
 	Player player_red=Player(0,MAP_SIZE-1,2*MAP_SIZE-2,0);    
 	Player player_blue=Player(1,MAP_SIZE,0,2*MAP_SIZE-2);
-	map.enemy_unit.push_back(&player_red);
+	/*暂时去掉
+    map.enemy_unit.push_back(&player_red);
 	map.enemy_unit.push_back(&player_blue);
 	map.enemy_num+=2;
+    */
     Json::Value m_root;//用于写json向前端汇报的根节点
 	//to do: 更改player初始位置
     // Player ai[2];
@@ -106,6 +108,7 @@ class Game
         os.open("init.json", std::ios::out | std::ios::app);
         os << sw.write(root);
         os.close();
+        
     }
     Json::Value reportEvent(int id, Coordinate pos)
     {
@@ -213,13 +216,13 @@ public:
     {
         turn = 0;
         init_map();
-
         // TODO : replay output
     }
     bool Update() //进行一个回合：若有一方死亡，游戏结束，返回true，否则返回false
     {
         Operation op;
         int mine_get;
+        
         // update采矿收入
         if(map[player_red.pos].MineIdx != -1)
         {
@@ -230,6 +233,7 @@ public:
                     mine_get = player_red.mine_speed;
                 player_red.mines += mine_get;
                 map.mine[map[player_red.pos].MineIdx].num -= mine_get;
+                
                 Json::Value event = reportEvent(0, player_red.pos);
                 event["CurrentEvent"] = "GATHER";
                 event["exp"] = mine_get;
@@ -252,12 +256,17 @@ public:
                 event["MinesLeft"] = map.mine[map[player_blue.pos].MineIdx].num;
                 m_root.append(event);
             }
-        }
+        }             
 
         // get operation from player red(0)
         //op = get_operation_red(player_red, limited_map(player_red));
-		op = get_operation_red(player_red, Map(map,player_red));
+		// real: op = get_operation_red(player_red, Map(map,player_red));
+        op = get_operation_red(player_red, map); // 暂时！
+        
+
         op = regulate(op,player_red);
+
+
         if (op.type == -1)
         {
             Json::Value event = reportEvent(0, player_red.pos);
@@ -265,6 +274,9 @@ public:
             m_root.append(event);
         }
         // todo: REPLAY 输出op red
+
+        
+        
 
         //更新移动相关（位置）
         if(op.type == 0)
@@ -286,6 +298,7 @@ public:
 				}
 			}
         }
+
         //更新攻击相关（血量）
         else if(op.type == 1)
         {
@@ -338,10 +351,11 @@ public:
         //判断存活状态
         if(player_blue.hp <= 0)
             return true;
-
+        
 
         // get operation from player blue(1)
-        op = get_operation_blue(player_red, Map(map,player_blue));
+        //real: op = get_operation_blue(player_red, Map(map,player_blue));
+        op = get_operation_blue(player_red, map); // 暂时！
         op = regulate(op,player_blue);
         if (op.type == -1)
         {
@@ -444,6 +458,7 @@ public:
             return true;
         
         return false;
+        
     }
 
     int proc() // 对局入口，返回胜者编号red(0), blue(1)
