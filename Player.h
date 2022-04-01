@@ -3,7 +3,7 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
-#include"Map.h"
+#include"Coordinate.h"
 
 class Player
 {

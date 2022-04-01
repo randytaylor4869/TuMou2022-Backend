@@ -4,10 +4,12 @@
 #define MAP_H
 
 #include "Player.h"
+#include "Coordinate.h"
 #include<string.h>
 #include<vector>
 #include <cstdlib>
 #include <cmath>
+#include <iostream>
 
 const int TURN_COUNT = 36 * 4;//回合数
 const int MAP_SIZE = 50;//地图的边长
@@ -48,24 +50,6 @@ public:
 	int num, belong = 0;   //belong=0为中立,-1蓝方，1红方
 	bool available = 1;
 	Mine(const int n, Coordinate x) { num = n; pos = x; }
-};
-
-
-
-struct Coordinate
-{
-	int x, y, z;
-	Coordinate() { x = 0, y = 0, z = 0; }
-	Coordinate(int a, int b, int c) { x = a, y = b, z = c; }
-
-	bool operator==(Coordinate t)
-	{
-		if (this->x == t.x && this->y == t.y && this->z == t.z)
-		{
-			return true;
-		}
-		return false;
-	}
 };
 
 

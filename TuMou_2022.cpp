@@ -2,12 +2,19 @@
 //
 
 #include"Game.h"
+// #include "Player.h"
+#include "player0.cpp"
+#include "player1.cpp"
 
 #include <iostream>
 
+Game game;
+
 int main()
 {
-    std::cout << "Hello World!\n";
+    int stat = game.proc();
+    std::cerr << "normal end with winner" << stat << std::endl;
+    return 0;
 }
 
 
