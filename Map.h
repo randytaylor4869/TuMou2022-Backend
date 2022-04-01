@@ -9,27 +9,27 @@
 #include <cstdlib>
 #include <cmath>
 
-const int TURN_COUNT = 36 * 4;//»ØºÏÊı
-const int MAP_SIZE = 50;//µØÍ¼µÄ±ß³¤
+const int TURN_COUNT = 36 * 4;//å›åˆæ•°
+const int MAP_SIZE = 50;//åœ°å›¾çš„è¾¹é•¿
 const int MINE_NUM = 100;
 
 const int oo = 2e9;
 
-enum Sign { RED, BLUE, TIE };//Íæ¼ÒÊÆÁ¦£¬ºì/À¶
-enum direction { N, NE, SE, S, SW, NW };//·½Ïò:
+enum Sign { RED, BLUE, TIE };//ç©å®¶åŠ¿åŠ›ï¼Œçº¢/è“
+enum direction { N, NE, SE, S, SW, NW };//æ–¹å‘:
 
 const int dx[6] = { 1, 1, 0, -1, -1, 0 }, dy[6] = { 0, -1, -1, 0, 1, 1 }, dz[6] = { -1, 0, 1, 1, 0, -1 };
 
 class Point
-{//×ø±êµãÀà
+{//åæ ‡ç‚¹ç±»
 public:
 	int x;
 	int y;
 	int z;
-	int MineIdx = -1;	//×ÊÔ´µãµÄĞòºÅ£¬-1´ú±íÃ»ÓĞ×ÊÔ´µã
-	int BarrierIdx = 0;	//ÕÏ°­ÎïµÄĞòºÅ£¬-1´ú±íÃ»ÓĞÕÏ°­Îï
-	int PlayerIdx = -1;	   //Íæ¼ÒµÄ±àºÅ£¬-1´ú±íÃ»ÓĞÍæ¼Ò£¬ 0ºì·½£¬1À¶·½
-	bool isvalid = 0;				//ÊÇ·ñÔÚµØÍ¼ÄÚ
+	int MineIdx = -1;	//èµ„æºç‚¹çš„åºå·ï¼Œ-1ä»£è¡¨æ²¡æœ‰èµ„æºç‚¹
+	int BarrierIdx = 0;	//éšœç¢ç‰©çš„åºå·ï¼Œ-1ä»£è¡¨æ²¡æœ‰éšœç¢ç‰©
+	int PlayerIdx = -1;	   //ç©å®¶çš„ç¼–å·ï¼Œ-1ä»£è¡¨æ²¡æœ‰ç©å®¶ï¼Œ 0çº¢æ–¹ï¼Œ1è“æ–¹
+	bool isvalid = 0;				//æ˜¯å¦åœ¨åœ°å›¾å†…
 
 	Point(const int _x = -1000, const int _y = -1000, const int _z = -1000, const int _mineindex = -1, const int _barrieridx = -1, const bool isvalid = 0) {
 		x = _x;
@@ -41,11 +41,11 @@ public:
 };
 
 
-class Mine {	//×ÊÔ´µã
+class Mine {	//èµ„æºç‚¹
 public:
 	//int weight, available, belong, initheight;
 	Coordinate pos;
-	int num, belong = 0;   //belong=0ÎªÖĞÁ¢,-1À¶·½£¬1ºì·½
+	int num, belong = 0;   //belong=0ä¸ºä¸­ç«‹,-1è“æ–¹ï¼Œ1çº¢æ–¹
 	bool available = 1;
 	Mine(const int n, Coordinate x) { num = n; pos = x; }
 };
@@ -71,19 +71,19 @@ struct Coordinate
 
 class Map {
 public:
-	Point data[2 * MAP_SIZE - 1][2 * MAP_SIZE - 1][2 * MAP_SIZE - 1];		//µØÍ¼ĞÅÏ¢£¬data[i][j][k]±íÊ¾µØÍ¼Ò»¸öÎ»ÖÃµÄĞÅÏ¢
+	Point data[2 * MAP_SIZE - 1][2 * MAP_SIZE - 1][2 * MAP_SIZE - 1];		//åœ°å›¾ä¿¡æ¯ï¼Œdata[i][j][k]è¡¨ç¤ºåœ°å›¾ä¸€ä¸ªä½ç½®çš„ä¿¡æ¯
 
 	std::vector <Mine> mine;
 	std::vector<Coordinate> barrier;
 	std::vector<Player> enemy_unit;
-	int nowSize = MAP_SIZE;			//µ±Ç°¶¾È¦µÄ±ß³¤
+	int nowSize = MAP_SIZE;			//å½“å‰æ¯’åœˆçš„è¾¹é•¿
 	int viewSize = MAP_SIZE;
 	int mine_num = 0;
 	int barrier_num = 0;
 	int enemy_num = 0;
 
 
-	Map()		//³õÊ¼»¯µØÍ¼
+	Map()		//åˆå§‹åŒ–åœ°å›¾
 	{
 		mine_num = 0;
 		barrier_num = 0;
@@ -95,11 +95,11 @@ public:
 				for (int k = 0; k < 2 * MAP_SIZE - 1; k++) {
 					if (isValid(i, j, k))
 					{
-						//Ëæ»úÅĞ¶ÏÊÇ·ñÓĞ×ÊÔ´µã¡¢ÕÏ°­Îï
+						//éšæœºåˆ¤æ–­æ˜¯å¦æœ‰èµ„æºç‚¹ã€éšœç¢ç‰©
 						int mineidx = -1;
 						int barrieridx = -1;
-						if (rand() % 10 == 1) { mineidx = mine_num; }				//Ê®·ÖÖ®Ò»¸ÅÂÊ£¬ TO DO£ºĞŞ¸ÄÊıÖµ
-						else if (rand() % 10 == 2) { barrieridx = barrier_num; }	//Ê®·ÖÖ®Ò»¸ÅÂÊ£¬ TO DO£ºĞŞ¸ÄÊıÖµ
+						if (rand() % 10 == 1) { mineidx = mine_num; }				//ååˆ†ä¹‹ä¸€æ¦‚ç‡ï¼Œ TO DOï¼šä¿®æ”¹æ•°å€¼
+						else if (rand() % 10 == 2) { barrieridx = barrier_num; }	//ååˆ†ä¹‹ä¸€æ¦‚ç‡ï¼Œ TO DOï¼šä¿®æ”¹æ•°å€¼
 
 						if (isValid(i, j, k))
 						{
@@ -122,7 +122,7 @@ public:
 	}
 
 
-	Map(Map totalmap, const Player& p)			//·µ»ØÍæ¼ÒpµÄÊÓÒ°µØÍ¼,´«µİ¸øÑ¡ÊÖ		
+	Map(Map totalmap, const Player& p)			//è¿”å›ç©å®¶pçš„è§†é‡åœ°å›¾,ä¼ é€’ç»™é€‰æ‰‹		
 	{
 		*this = totalmap;
 		viewSize = p.sight_range;
@@ -155,7 +155,7 @@ public:
 	}
 
 
-	bool isValid(int x, int y, int z)		//ÅĞ¶ÏÄ³¸ö×ø±êÊÇ·ñÔÚµØÍ¼ÄÚ 
+	bool isValid(int x, int y, int z)		//åˆ¤æ–­æŸä¸ªåæ ‡æ˜¯å¦åœ¨åœ°å›¾å†… 
 	{
 		if (x >= 0 && x <= 2 * MAP_SIZE - 1 && y >= 0 && y <= 2 * MAP_SIZE - 1 && z >= 0 && z <= 2 * MAP_SIZE - 1)
 		{
@@ -170,14 +170,14 @@ public:
 
 	Point operator [] (const Coordinate& c) { return data[c.x][c.y][c.z]; }
 
-	bool isValid(Coordinate c)				//ÅĞ¶ÏÄ³¸ö×ø±êÊÇ·ñÔÚµØÍ¼ÄÚ  
+	bool isValid(Coordinate c)				//åˆ¤æ–­æŸä¸ªåæ ‡æ˜¯å¦åœ¨åœ°å›¾å†…  
 	{
 		return isValid(c.x, c.y, c.z);
 	}
 
 
 
-	int getDistance(Coordinate a, Coordinate b)		//¼ÆËãÁ½¸ö×ø±êÖ®¼äµÄ¾àÀë 
+	int getDistance(Coordinate a, Coordinate b)		//è®¡ç®—ä¸¤ä¸ªåæ ‡ä¹‹é—´çš„è·ç¦» 
 	{
 		return (abs(a.x - b.x), abs(a.y - b.y), abs(a.z - b.z)) / 2;
 	}

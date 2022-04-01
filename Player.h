@@ -12,15 +12,15 @@ public:
 
 	Coordinate pos;
 
-	int attack_range;   //¹¥»÷·¶Î§
-	int sight_range; //ÊÓÒ°·¶Î§
-	int move_range; //ÒÆ¶¯·¶Î§
-	int mine_speed; //²É¼¯ËÙ¶È
+	int attack_range;   //æ”»å‡»èŒƒå›´
+	int sight_range; //è§†é‡èŒƒå›´
+	int move_range; //ç§»åŠ¨èŒƒå›´
+	int mine_speed; //é‡‡é›†é€Ÿåº¦
 
-	int at; //¹¥»÷Á¦
-	int hp; //ÑªÁ¿
+	int at; //æ”»å‡»åŠ›
+	int hp; //è¡€é‡
 
-	int mines;  // ²É¼¯µ½µÄ×ÊÔ´
+	int mines;  // é‡‡é›†åˆ°çš„èµ„æº
 
 	Player(int _id) : id(_id), attack_range(1), sight_range(6), move_range(1), mine_speed(10),
 		at(10), hp(100),mines(0) {};  //pos at (0,0,0)
@@ -30,7 +30,7 @@ public:
 	Player(int _id, Coordinate c) : id(_id), attack_range(1), sight_range(6), move_range(1), mine_speed(10),
 		at(10), hp(100), mines(0), pos(c) {};  //pos at (0,0,0)
 
-	// todo : µ÷½Ú³õÊ¼»¯Êı¾İ
+	// todo : è°ƒèŠ‚åˆå§‹åŒ–æ•°æ®
 
 };
 
