@@ -29,7 +29,7 @@ public:
 	int y;
 	int z;
 	int MineIdx = -1;	//资源点的序号，-1代表没有资源点
-	int BarrierIdx = 0;	//障碍物的序号，-1代表没有障碍物
+	int BarrierIdx = -1;	//障碍物的序号，-1代表没有障碍物
 	int PlayerIdx = -1;	   //玩家的编号，-1代表没有玩家， 0红方，1蓝方
 	bool isvalid = 0;				//是否在地图内
 
@@ -66,44 +66,92 @@ public:
 	int barrier_num = 0;
 	int enemy_num = 0;
 
+	Map() {}
 
-	Map()		//初始化地图
+	
+	Map(const Map& map)
 	{
-		mine_num = 0;
-		barrier_num = 0;
-		enemy_num = 0;
-		unsigned seed;
-		srand(seed);
+		//std::cerr << "Call Map(const Map& map)!" << std::endl;
 		for (int i = 0; i < 2 * MAP_SIZE - 1; i++)
 			for (int j = 0; j < 2 * MAP_SIZE - 1; j++)
-				for (int k = 0; k < 2 * MAP_SIZE - 1; k++) {
-					if (isValid(i, j, k))
-					{
-						//随机判断是否有资源点、障碍物
-						int mineidx = -1;
-						int barrieridx = -1;
-						if (rand() % 10 == 1) { mineidx = mine_num; }				//十分之一概率， TO DO：修改数值
-						else if (rand() % 10 == 2) { barrieridx = barrier_num; }	//十分之一概率， TO DO：修改数值
-
-						if (isValid(i, j, k))
-						{
-							data[i][j][k] = Point(i, j, k, mineidx, barrieridx, 1);
-							if (mineidx >= 0)
-							{
-								mine.push_back(Mine(MINE_NUM, Coordinate(i, j, k)));
-								mine_num++;
-							}
-							if (barrieridx >= 0)
-							{
-								barrier.push_back(Coordinate(i, j, k));
-								barrier_num++;
-							}
-						}
-
-
-					}
-				}
+				for (int k = 0; k < 2 * MAP_SIZE - 1; k++)
+					data[i][j][k] = map.data[i][j][k];
+		for (int i = 0; i < map.mine.size(); i++)
+			mine.push_back(map.mine[i]);
+		for (int i = 0; i < map.barrier.size(); i++)
+			barrier.push_back(map.barrier[i]);
+		for (int i = 0; i < map.enemy_unit.size(); i++)
+			enemy_unit.push_back(map.enemy_unit[i]);
+		nowSize = map.nowSize;
+		viewSize = map.viewSize;
+		mine_num = map.mine_num;
+		barrier_num = map.barrier_num;
+		enemy_num = map.enemy_num;
 	}
+
+	//Map& operator = (const Map&& right) = delete;
+	Map& operator = (const Map& right)
+	{
+		//std::cerr << "Call Map& operator = (const Map& right)!" << std::endl;
+		if(this != &right)
+		{
+			for (int i = 0; i < 2 * MAP_SIZE - 1; i++)
+				for (int j = 0; j < 2 * MAP_SIZE - 1; j++)
+					for (int k = 0; k < 2 * MAP_SIZE - 1; k++)
+						data[i][j][k] = right.data[i][j][k];
+			for (int i = 0; i < right.mine.size(); i++)
+				mine.push_back(right.mine[i]);
+			for (int i = 0; i < right.barrier.size(); i++)
+				barrier.push_back(right.barrier[i]);
+			for (int i = 0; i < right.enemy_unit.size(); i++)
+				enemy_unit.push_back(right.enemy_unit[i]);
+			nowSize = right.nowSize;
+			viewSize = right.viewSize;
+			mine_num = right.mine_num;
+			barrier_num = right.barrier_num;
+			enemy_num = right.enemy_num;
+		}
+		return *this;
+	} 
+
+
+	//Map buildMap()		//初始化地图
+	//{
+	//	mine_num = 0;
+	//	barrier_num = 0;
+	//	enemy_num = 0;
+	//	unsigned seed;
+	//	srand(seed);
+	//	for (int i = 0; i < 2 * MAP_SIZE - 1; i++)
+	//		for (int j = 0; j < 2 * MAP_SIZE - 1; j++)
+	//			for (int k = 0; k < 2 * MAP_SIZE - 1; k++) {
+	//				if (isValid(i, j, k))
+	//				{
+	//					//随机判断是否有资源点、障碍物
+	//					int mineidx = -1;
+	//					int barrieridx = -1;
+	//					if (rand() % 10 == 1) { mineidx = mine_num; }				//十分之一概率， TO DO：修改数值
+	//					else if (rand() % 10 == 2) { barrieridx = barrier_num; }	//十分之一概率， TO DO：修改数值
+
+	//					if (isValid(i, j, k))
+	//					{
+	//						data[i][j][k] = Point(i, j, k, mineidx, barrieridx, 1);
+	//						if (mineidx >= 0)
+	//						{
+	//							mine.push_back(Mine(MINE_NUM, Coordinate(i, j, k)));
+	//							mine_num++;
+	//						}
+	//						if (barrieridx >= 0)
+	//						{
+	//							barrier.push_back(Coordinate(i, j, k));
+	//							barrier_num++;
+	//						}
+	//					}
+
+
+	//				}
+	//			}
+	//}
 
 
 	Map(Map totalmap, const Player& p)			//返回玩家p的视野地图,传递给选手		
@@ -163,7 +211,7 @@ public:
 
 	int getDistance(Coordinate a, Coordinate b)		//计算两个坐标之间的距离 
 	{
-		return (abs(a.x - b.x), abs(a.y - b.y), abs(a.z - b.z)) / 2;
+		return (abs(a.x - b.x)+abs(a.y - b.y)+abs(a.z - b.z)) / 2;
 	}
 
 };
