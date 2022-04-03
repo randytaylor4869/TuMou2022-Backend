@@ -187,7 +187,7 @@ public:
 	}
 
 
-	bool isValid(int x, int y, int z)		//判断某个坐标是否在地图内 
+	bool isValid(int x, int y, int z) const	//判断某个坐标是否在地图内 
 	{
 		if (x >= 0 && x <= 2 * MAP_SIZE - 1 && y >= 0 && y <= 2 * MAP_SIZE - 1 && z >= 0 && z <= 2 * MAP_SIZE - 1)
 		{
@@ -200,16 +200,16 @@ public:
 			return false;
 	}
 
-	Point operator [] (const Coordinate& c) { return data[c.x][c.y][c.z]; }
+	Point& operator [] (const Coordinate& c) { return data[c.x][c.y][c.z]; }
 
-	bool isValid(Coordinate c)				//判断某个坐标是否在地图内  
+	bool isValid(Coordinate c) const			//判断某个坐标是否在地图内  
 	{
 		return isValid(c.x, c.y, c.z);
 	}
 
 
 
-	int getDistance(Coordinate a, Coordinate b)		//计算两个坐标之间的距离 
+	int getDistance(Coordinate a, Coordinate b) const		//计算两个坐标之间的距离 
 	{
 		return (abs(a.x - b.x)+abs(a.y - b.y)+abs(a.z - b.z)) / 2;
 	}

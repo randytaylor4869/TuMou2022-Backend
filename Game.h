@@ -36,8 +36,8 @@ class Game
 {
 
 
-	Player player_red = Player(0, MAP_SIZE - 1, 2 * MAP_SIZE - 2, 0);
-	Player player_blue = Player(1, MAP_SIZE, 0, 2 * MAP_SIZE - 2);
+	Player player_red = Player(0, MAP_SIZE - 1, 2 * MAP_SIZE - 2, 0);   
+	Player player_blue = Player(1, MAP_SIZE - 1, 0, 2 * MAP_SIZE - 2);
 
 	Map map = buildMap();
     Map mymap; // 用于player_map()函数中返回值，向选手传参
@@ -263,10 +263,16 @@ class Game
 		// 检查target在地图范围内、在攻击/移动距离内
 		if (op.type == 0)
 		{
+            //std::cerr << "into here\n";
 			if (!map.isValid(op.target))
+            {
+                //std::cerr << "invalid target\n";
 				return ret;
+            }
+            //std::cerr << "valid here\n";
 			if (map.getDistance(op.target, p.pos) > p.move_range)
 				return ret;
+            //std::cerr << "still valid here\n";
 		}
 		else if (op.type == 1)
 		{
@@ -294,6 +300,7 @@ class Game
 
 		// 检查升级时机（回合数）是否合法
 		// TBD
+        //std::cerr << "valid move " << op.type << ' ' << map.getDistance(p.pos,op.target) << "\n";
 		return op;
 	}
 
@@ -391,7 +398,6 @@ public:
 
 
 
-
 		//更新移动相关（位置）
 		if (op.type == 0)
 		{
@@ -481,6 +487,8 @@ public:
 		//更新移动相关（位置）
 		if (op.type == 0)
 		{
+            
+            //std::cerr << "Moved\n" << op.target.x << ' ' << op.target.y << ' ' << op.target.z << '\n';
 			player_blue.pos = op.target;
 			Json::Value event = reportEvent(1, player_blue.pos);
 			event["CurrentEvent"] = "MOVE";
@@ -558,11 +566,11 @@ public:
 				map.nowSize--;
 		}
 		//缩圈伤害
-		if (map.getDistance(player_red.pos, Coordinate(0, 0, 0)) > map.nowSize)
+		if (map.getDistance(player_red.pos, Coordinate(MAP_SIZE-1, MAP_SIZE-1, MAP_SIZE-1)) > map.nowSize)
 		{
 			player_red.hp -= 10; // TODO: 调整这个值，随时间变化？
 		}
-		if (map.getDistance(player_blue.pos, Coordinate(0, 0, 0)) > map.nowSize)
+		if (map.getDistance(player_blue.pos, Coordinate(MAP_SIZE-1, MAP_SIZE-1, MAP_SIZE-1)) > map.nowSize)
 		{
 			player_blue.hp -= 10; // TODO: 调整这个值，随时间变化？
 		}
@@ -580,6 +588,8 @@ public:
 		for (turn = 1; turn <= TURN_COUNT; turn++)
 		{
 			//std::cerr << "turn" << turn << std::endl;
+            //std::cerr << player_red.hp << ' '<< player_blue.hp << std::endl;
+            //std::cerr << map.getDistance(player_red.pos, Coordinate(MAP_SIZE-1, MAP_SIZE-1, MAP_SIZE-1)) << ' ' << map.getDistance(player_blue.pos, Coordinate(MAP_SIZE-1, MAP_SIZE-1, MAP_SIZE-1)) << ' ' << map.nowSize << std::endl;
 			if (Update())
 				break;
 		}
@@ -591,7 +601,7 @@ public:
 			event["CurrentEvent"] = "DIED";
 			event["WinnerId"] = player_blue.id;
 			m_root.append(event);
-			// cout << "Game ends in turn " << turn << " : player blue wins!" << endl;
+			std::cerr << "Game ends in turn " << turn << " : player blue wins!" << std::endl;
 			return 1;
 		}
 		if (player_blue.hp <= 0)
@@ -600,7 +610,7 @@ public:
 			event["CurrentEvent"] = "DIED";
 			event["WinnerId"] = player_red.id;
 			m_root.append(event);
-			// cout << "Game ends in turn " << turn << " : player red wins!" << endl;
+			std::cerr << "Game ends in turn " << turn << " : player red wins!" << std::endl;
 			return 0;
 		}
 		return -1; // 出错，没有死亡
