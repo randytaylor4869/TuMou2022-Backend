@@ -26,7 +26,7 @@ Operation get_operation_red(const Player& player, const Map& map)   // todo : SD
     op.target.y = player.pos.y + 1;
     op.target.z = player.pos.z + 1;
     op.upgrade = 1;
-    srand(0);
+    srand(time(0));
     op.upgrade = rand() % 6;
     return op;
 }
@@ -58,7 +58,7 @@ Operation get_operation_blue(const Player& player, const Map& map)   // todo : S
     op.target.y = player.pos.y + 1;
     op.target.z = player.pos.z + 1;
     op.upgrade = 1;
-    srand(0);
+    srand(time(0));
     op.upgrade = rand() % 6;
     return op;
 }
