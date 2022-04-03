@@ -47,12 +47,13 @@ class Game
 	map.enemy_unit.push_back(&player_blue);
 	map.enemy_num+=2;
 	*/
+	int turn;
+public:
 	Json::Value m_root;//用于写json向前端汇报的根节点
 	//to do: 更改player初始位置
 	// Player ai[2];
-	int turn;
-
-
+	
+private:
 	Map buildMap()		//初始化地图
 	{
 		Map mymap = Map();
@@ -162,7 +163,7 @@ class Game
 		return mymap;
 	}
 
-	void init_map()			//已在Map的构造函数中实现
+	void init_json()			//已在Map的构造函数中实现
 	{
 		// Barrier
 		// Mine
@@ -170,7 +171,6 @@ class Game
 		//输出json文件
 		Json::Value root;
 		Json::Value maps;
-		root["map"] = Json::Value(maps);
 		for (int i = 0; i < 3; i++)
 		{
 			maps["size"].append(map.nowSize);
@@ -192,8 +192,8 @@ class Game
 			tmp_array.append(map.mine[i].num);
 			maps["Resource"].append(tmp_array);
 		}
+		root["map"] = maps;
 		Json::Value players;
-		root["players"] = Json::Value(players);
 		Json::Value item;
 		item["id"] = 0;
 		item["name"] = "Player1";
@@ -215,15 +215,17 @@ class Game
 		item["mine_speed"] = player_blue.mine_speed;
 		item["atk"] = player_blue.at;
 		item["hp"] = player_blue.hp;
+		item["Position"].resize(0);
 		item["Position"].append(player_blue.pos.x);
 		item["Position"].append(player_blue.pos.y);
 		item["Position"].append(player_blue.pos.z);
-		Json::StyledWriter sw;
+		players.append(item);
+		root["players"] = players;
 		std::ofstream os;
-		os.open("init.json", std::ios::out | std::ios::app);
+		os.open("init.json");
+		Json::StyledWriter sw;
 		os << sw.write(root);
 		os.close();
-
 	}
 	Json::Value reportEvent(int id, Coordinate pos)
 	{
@@ -335,7 +337,6 @@ public:
 	Game()
 	{
 		turn = 0;
-		init_map();
 		// TODO : replay output
 	}
 	bool Update() //进行一个回合：若有一方死亡，游戏结束，返回true，否则返回false
@@ -479,7 +480,7 @@ public:
 		op = regulate(op, player_blue);
 		if (op.type == -1)
 		{
-			Json::Value event = reportEvent(0, player_red.pos);
+			Json::Value event = reportEvent(1, player_blue.pos);
 			event["CurrentEvent"] = "ERROR";
 			m_root.append(event);
 		}
@@ -585,6 +586,7 @@ public:
 
 	int proc() // 对局入口，返回胜者编号red(0), blue(1)
 	{
+		init_json();
 		for (turn = 1; turn <= TURN_COUNT; turn++)
 		{
 			//std::cerr << "turn" << turn << std::endl;

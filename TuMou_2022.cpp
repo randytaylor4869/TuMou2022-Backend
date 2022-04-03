@@ -13,6 +13,13 @@ Game game;
 int main()
 {
     int stat = game.proc();
+    Json::Value list;
+    list["list"] = game.m_root;
+    std::ofstream os;
+    os.open("game.json");
+    Json::StyledWriter sw;
+    os << sw.write(list);
+    os.close();
     std::cerr << "normal end with winner" << stat << std::endl;
     return 0;
 }
