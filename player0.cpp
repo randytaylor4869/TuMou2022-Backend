@@ -26,7 +26,7 @@ Operation get_operation_red(const Player& player, const Map& map)   // todo : SD
     op.target.y = player.pos.y + 1;
     op.target.z = player.pos.z + 1;
     op.upgrade = 1;
-    srand(0);
+    srand(time(0));
     op.upgrade = rand() % 6;
     return op;
 }
@@ -52,13 +52,22 @@ Operation get_operation_blue(const Player& player, const Map& map)   // todo : S
     int enemy_num = map.enemy_num;
 
     //玩家可以根据以上获取的信息来进行决策
-
+    srand(time(0));
     op.type = 0;
-    op.target.x = player.pos.x + 1;
-    op.target.y = player.pos.y + 1;
-    op.target.z = player.pos.z + 1;
+    for(int i = 0, j = rand()%6, k; i < 6; i++)
+    {
+        k = (j + i) % 6;
+        op.target.x = player.pos.x + dx[k];
+        op.target.y = player.pos.y + dy[k];
+        op.target.z = player.pos.z + dz[k];
+        if(map.isValid(op.target) && map.getDistance(player.pos, op.target) <= move_range)
+        {
+            //std::cerr << "getit\n";
+            break;
+        }
+    }
+    
     op.upgrade = 1;
-    srand(0);
     op.upgrade = rand() % 6;
     return op;
 }
