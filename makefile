@@ -1,29 +1,29 @@
+LOGS = p1.log p2.log
+JUDGE_EXEC := ./judge
+PLAYER_CMD := ./player
 
-.PHONY: all clean
-header = $(wildcard *.h) $(wildcard ./json/*.h) $(wildcard ./lib_json/*.h) $(wildcard ./lib_json/*.inl)
+header = $(wildcard *.h) $(wildcard ./json/*.h) $(wildcard ./lib_json/*.h) $(wildcard ./lib_json/*.inl) $(wildcard ./lib_bot/*.h)
 json_src =  $(wildcard ./lib_json/*.cpp)
 
-all: main1 main2
+default: judge player run
 
-main1: TuMou_2022.cpp player0_red.o player1_blue.o $(json_src) $(header) 
-	g++ TuMou_2022.cpp player0_red.o player1_blue.o $(json_src) -o $@
-	
-main2: TuMou_2022.cpp player0_blue.o player1_red.o $(json_src) $(header)
-	g++ TuMou_2022.cpp player0_blue.o player1_red.o $(json_src) -o $@
+judge: lib_bot/Bot.cpp judge.cpp $(json_src) $(header)
+	g++ lib_bot/Bot.cpp judge.cpp $(json_src)  -o $@
 
-player0_red.o: player0.cpp $(header)
-	g++ -c -D __PLAYER_RED__ -o $@ $<
+player: lib_bot/Bot.cpp player.cpp $(json_src) $(header)
+	g++ lib_bot/Bot.cpp player.cpp $(json_src) -o $@
 
-player0_blue.o: player0.cpp $(header)
-	g++ -c -D __PLAYER_BLUE__ -o $@ $<
+run:
+	@ "$(JUDGE_EXEC)" $(JUDGE_ARGS) "$(PLAYER_CMD)" "$(PLAYER_CMD)" $(LOGS)
 
-player1_red.o: player1.cpp $(header)
-	g++ -c -D __PLAYER_RED__ -o $@ $<
+clean: clean_exec clean_log
 
-player1_blue.o: player1.cpp $(header)
-	g++ -c -D __PLAYER_BLUE__ -o $@ $<
+clean_exec:
+	$(RM) -f judge player
+	$(RM) -f judge.exe player.exe
 
-clean:
-	rm -f *.o
-	rm -f main1 main2
-	rm -f main1.exe main2.exe
+clean_log:
+	$(RM) -f *.log
+
+
+.PHONY: default run clean clean_exec clean_log
