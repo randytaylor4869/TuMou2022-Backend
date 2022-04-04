@@ -6,6 +6,8 @@
 #include "Map.h"
 #include "Player.h"
 #include "json/json.h"
+#include <stdio.h>
+#include <stdlib.h>
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
@@ -31,15 +33,17 @@ Operation get_operation_red(const Player& player, const Map& map);   // todo : S
 Operation get_operation_blue(const Player& player, const Map& map);   // todo : SDK，玩家编写
 //这样写其实就不用写通信了
 
+Operation get_operation(const Player& player, const Map& map);   // todo : SDK，玩家编写
+
 
 class Game
 {
-
+	const int player_id;
 
 	Player player_red = Player(0, MAP_SIZE - 1, 2 * MAP_SIZE - 2, 0);   
 	Player player_blue = Player(1, MAP_SIZE - 1, 0, 2 * MAP_SIZE - 2);
 
-	Map map = buildMap();
+	Map map;
     Map mymap; // 用于player_map()函数中返回值，向选手传参
 
 	/*暂时去掉
@@ -52,15 +56,13 @@ public:
 	Json::Value m_root;//用于写json向前端汇报的根节点
 	//to do: 更改player初始位置
 	// Player ai[2];
-	
-private:
-	Map buildMap()		//初始化地图
+
+	Map buildMap(unsigned seed = 0)		//初始化地图
 	{
 		Map mymap = Map();
 		mymap.mine_num = 0;
 		mymap.barrier_num = 0;
 		mymap.enemy_num = 0;
-		unsigned seed;
 		srand(seed);
 		for (int i = 0; i < 2 * MAP_SIZE - 1; i++) {
 			for (int j = 0; j < 2 * MAP_SIZE - 1; j++) {
@@ -333,12 +335,32 @@ private:
 			break;
 		}
 	}
-public:
-	Game()
+	Operation get_operation_opponent()
 	{
-		turn = 0;
-		// TODO : replay output
+		Operation op;
+		char *s = bot_recv();
+		sscanf(s, "%d %d %d %d %d %d", &op.type, &op.target.x, &op.target.y, &op.target.z, &op.upgrade, &op.upgrade_type);
+		free(s);
+		return op;
 	}
+	void send_operation(Operation op)
+	{
+		char s[100];
+		sprintf(s, "%d %d %d %d %d %d", op.type, op.target.x, op.target.y, op.target.z, op.upgrade, op.upgrade_type);
+		bot_send(s);
+		return;
+	}
+	Operation judge_proc(int current_player, int* err)
+	{
+		char* s = bot_judge_recv(current_player, err, 2000);
+		bot_judge_send(current_player^1, s);
+		Operation op;
+		sscanf(s, "%d %d %d %d %d %d", &op.type, &op.target.x, &op.target.y, &op.target.z, &op.upgrade, &op.upgrade_type);
+		free(s);
+		return op;
+		// TODO: 根据err判断选手程序是否正常返回操作
+	}
+
 	bool Update() //进行一个回合：若有一方死亡，游戏结束，返回true，否则返回false
 	{
 		Operation op;
@@ -385,7 +407,19 @@ public:
 		//Map(map,player_red);
 
 		//op = get_operation_red(player_red, tmp);
-		op = get_operation_red(player_red, player_map(player_red)); // 暂时！
+		int err;
+		if(player_id == 0)
+		{
+			op = get_operation(player_red, player_map(player_red)); // 暂时！
+			send_operation(op);
+		}
+		else if(player_id == 1)
+			op = get_operation_opponent();
+		else // judge -1
+		{
+			op = judge_proc(0, &err);
+			// todo : process err
+		}
 
 		op = regulate(op, player_red);
 
@@ -476,8 +510,22 @@ public:
 
 		// get operation from player blue(1)
 		//real: op = get_operation_blue(player_red, Map(map,player_blue));
-		op = get_operation_blue(player_blue, map); // 暂时！
+		
+		if(player_id == 1)
+		{
+			op = get_operation(player_blue, player_map(player_blue));
+			send_operation(op);
+		}
+		else if(player_id == 0)
+			op = get_operation_opponent();
+		else // judge -1
+		{
+			op = judge_proc(1, &err);
+			// todo : process err
+		}
+		
 		op = regulate(op, player_blue);
+
 		if (op.type == -1)
 		{
 			Json::Value event = reportEvent(1, player_blue.pos);
@@ -582,6 +630,18 @@ public:
 
 		return false;
 
+	}
+public:
+	Game() : player_id (-2) // -2 stands for uninitialized
+	{
+		turn = 0; 
+		init_json();
+		// TODO : replay output
+	}
+	Game(int x, int y) : player_id(x), map(buildMap(y)){
+		turn = 0;
+		init_json();
+		//TODO : 对于player来说，不需要生成录像（json）
 	}
 
 	int proc() // 对局入口，返回胜者编号red(0), blue(1)
