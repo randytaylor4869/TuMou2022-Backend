@@ -42,7 +42,13 @@ int main(int argc, char *argv[])
         printf("The winner is player %d\n", stat);
     else
         printf("Game Ends Abnormally with code %d\n", stat);
-
+    Json::Value list;
+    list["list"] = game->m_root;
+    std::ofstream os;
+	os.open("game.json");
+	Json::StyledWriter sw;
+	os << sw.write(list);
+	os.close();
     /* Terminate the players */
     bot_judge_finish();
 
