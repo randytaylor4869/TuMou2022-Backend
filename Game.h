@@ -258,6 +258,8 @@ public:
 	Operation regulate(Operation op, const Player& p)
 	{
 		Operation ret;
+		ret.upgrade = op.upgrade;
+		ret.upgrade_type = op.upgrade_type;
 		//若不合法，一律返回什么都不做none(-1)
 
 		// 检查type在范围内
@@ -267,16 +269,14 @@ public:
 		// 检查target在地图范围内、在攻击/移动距离内
 		if (op.type == 0)
 		{
-            //std::cerr << "into here\n";
 			if (!map.isValid(op.target))
             {
-                //std::cerr << "invalid target\n";
-				return ret;
+                return ret;
             }
-            //std::cerr << "valid here\n";
 			if (map.getDistance(op.target, p.pos) > p.move_range)
 				return ret;
-            //std::cerr << "still valid here\n";
+			if (map.data[op.target.x][op.target.y][op.target.z].BarrierIdx != -1 || map.data[op.target.x][op.target.y][op.target.z].PlayerIdx != -1)
+				return ret;
 		}
 		else if (op.type == 1)
 		{

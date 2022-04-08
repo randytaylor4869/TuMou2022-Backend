@@ -75,6 +75,7 @@ Operation get_operation_blue(const Player& player, const Map& map)   // todo : S
 
 Operation get_operation(const Player& player, const Map& map)
 {
+    
     return get_operation_red(player, map);
 }
 

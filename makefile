@@ -2,8 +2,10 @@ LOGS = p1.log p2.log
 JUDGE_EXEC := ./judge
 PLAYER_CMD := ./player
 
-header = $(wildcard *.h) $(wildcard ./json/*.h) $(wildcard ./lib_json/*.h) $(wildcard ./lib_json/*.inl) $(wildcard ./lib_bot/*.h)
-json_src =  $(wildcard ./lib_json/*.cpp)
+#header = $(wildcard *.h) $(wildcard ./json/*.h) $(wildcard ./lib_json/*.h) $(wildcard ./lib_json/*.inl) $(wildcard ./lib_bot/*.h)
+#json_src =  $(wildcard ./lib_json/*.cpp)
+
+header = $(wildcard *.h) $(w)
 
 default: judge player run
 
