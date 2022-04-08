@@ -67,7 +67,7 @@ Operation get_operation_red(const Player& player, const Map& map)   // todo : SD
             }
         }
     }
-    op.type = 0; //移动
+    op.type = 0; //角色默认向远离毒圈的方向移动
     Coordinate center(MAP_SIZE - 1, MAP_SIZE - 1, MAP_SIZE - 1);
     for(int i = 0; i < 6; i++)
     {
@@ -146,7 +146,7 @@ Operation get_operation_blue(const Player& player, const Map& map)   // todo : S
             }
         }
     }
-    op.type = 0; //移动
+    op.type = 0; //角色默认向远离毒圈的方向移动
     Coordinate center(MAP_SIZE - 1, MAP_SIZE - 1, MAP_SIZE - 1);
     for(int i = 0; i < 6; i++)
     {
