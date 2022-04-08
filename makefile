@@ -5,15 +5,15 @@ PLAYER_CMD := ./player
 #header = $(wildcard *.h) $(wildcard ./json/*.h) $(wildcard ./lib_json/*.h) $(wildcard ./lib_json/*.inl) $(wildcard ./lib_bot/*.h)
 #json_src =  $(wildcard ./lib_json/*.cpp)
 
-header = $(wildcard *.h) $(w)
+header = $(wildcard *.h) $(wildcard *.hpp) $(wildcard ./lib_bot/*.h)
 
 default: judge player run
 
-judge: lib_bot/Bot.cpp judge.cpp $(json_src) $(header)
-	g++ lib_bot/Bot.cpp judge.cpp $(json_src)  -o $@
+judge: lib_bot/Bot.cpp judge.cpp $(header)
+	g++ lib_bot/Bot.cpp judge.cpp -o $@
 
-player: lib_bot/Bot.cpp player.cpp $(json_src) $(header)
-	g++ lib_bot/Bot.cpp player.cpp $(json_src) -o $@
+player: lib_bot/Bot.cpp player.cpp $(header)
+	g++ lib_bot/Bot.cpp player.cpp -o $@
 
 run:
 	@ "$(JUDGE_EXEC)" $(JUDGE_ARGS) "$(PLAYER_CMD)" "$(PLAYER_CMD)" $(LOGS)
@@ -26,6 +26,7 @@ clean_exec:
 
 clean_log:
 	$(RM) -f *.log
+	$(RM) output.txt
 
 
 .PHONY: default run clean clean_exec clean_log
