@@ -1,4 +1,5 @@
 #include "lib_bot/Bot.h"
+//提交时：改为：include "bot.h"
 
 #include "Game.h"
 #include <stdio.h>

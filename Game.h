@@ -5,7 +5,6 @@
 
 #include "Map.h"
 #include "Player.h"
-#include "json/json.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>
@@ -13,6 +12,8 @@
 #include <cstdlib>
 #include <ctime>
 #include <vector>
+#include "json.hpp"
+using json = nlohmann::json;
 
 const int UPGRADE_COST[6] = { 100, 100, 100, 100, 100, 100 }; // todo：确定升级类型所需要的mine数
 
@@ -29,8 +30,8 @@ public:
 
 
 
-Operation get_operation_red(const Player& player, const Map& map);   // todo : SDK，玩家编写
-Operation get_operation_blue(const Player& player, const Map& map);   // todo : SDK，玩家编写
+//Operation get_operation_red(const Player& player, const Map& map);   // todo : SDK，玩家编写
+//Operation get_operation_blue(const Player& player, const Map& map);   // todo : SDK，玩家编写
 //这样写其实就不用写通信了
 
 Operation get_operation(const Player& player, const Map& map);   // todo : SDK，玩家编写
@@ -53,7 +54,8 @@ class Game
 	*/
 	int turn;
 public:
-	Json::Value m_root;//用于写json向前端汇报的根节点
+	json m_root;//用于写json向前端汇报的根节点
+	json m_init;
 	//to do: 更改player初始位置
 	// Player ai[2];
 
@@ -171,32 +173,32 @@ public:
 		// Mine
 		// 玩家位置！
 		//输出json文件
-		Json::Value root;
-		Json::Value maps;
+		json root;
+		json maps;
 		for (int i = 0; i < 3; i++)
 		{
-			maps["size"].append(map.nowSize);
+			maps["size"].push_back(map.nowSize);
 		}
 		for (int i = 0; i < map.barrier_num; i++)
 		{
-			Json::Value tmp_array;
-			tmp_array.append(map.barrier[i].x);
-			tmp_array.append(map.barrier[i].y);
-			tmp_array.append(map.barrier[i].z);
-			maps["Barrier"].append(tmp_array);
+			json tmp_array;
+			tmp_array.push_back(map.barrier[i].x);
+			tmp_array.push_back(map.barrier[i].y);
+			tmp_array.push_back(map.barrier[i].z);
+			maps["Barrier"].push_back(tmp_array);
 		}
 		for (int i = 0; i < map.mine_num; i++)
 		{
-			Json::Value tmp_array;
-			tmp_array.append(map.mine[i].pos.x);
-			tmp_array.append(map.mine[i].pos.y);
-			tmp_array.append(map.mine[i].pos.z);
-			tmp_array.append(map.mine[i].num);
-			maps["Resource"].append(tmp_array);
+			json tmp_array;
+			tmp_array.push_back(map.mine[i].pos.x);
+			tmp_array.push_back(map.mine[i].pos.y);
+			tmp_array.push_back(map.mine[i].pos.z);
+			tmp_array.push_back(map.mine[i].num);
+			maps["Resource"].push_back(tmp_array);
 		}
 		root["map"] = maps;
-		Json::Value players;
-		Json::Value item;
+		json players;
+		json item;
 		item["id"] = 0;
 		item["name"] = "Player1";
 		item["attack_range"] = player_red.attack_range;
@@ -205,10 +207,10 @@ public:
 		item["mine_speed"] = player_red.mine_speed;
 		item["atk"] = player_red.at;
 		item["hp"] = player_red.hp;
-		item["Position"].append(player_red.pos.x);
-		item["Position"].append(player_red.pos.y);
-		item["Position"].append(player_red.pos.z);
-		players.append(item);
+		item["Position"].push_back(player_red.pos.x);
+		item["Position"].push_back(player_red.pos.y);
+		item["Position"].push_back(player_red.pos.z);
+		players.push_back(item);
 		item["id"] = 1;
 		item["name"] = "Player2";
 		item["attack_range"] = player_blue.attack_range;
@@ -217,34 +219,31 @@ public:
 		item["mine_speed"] = player_blue.mine_speed;
 		item["atk"] = player_blue.at;
 		item["hp"] = player_blue.hp;
-		item["Position"].resize(0);
-		item["Position"].append(player_blue.pos.x);
-		item["Position"].append(player_blue.pos.y);
-		item["Position"].append(player_blue.pos.z);
-		players.append(item);
+		item["Position"].clear();
+		item["Position"].push_back(player_blue.pos.x);
+		item["Position"].push_back(player_blue.pos.y);
+		item["Position"].push_back(player_blue.pos.z);
+		players.push_back(item);
 		root["players"] = players;
-		std::ofstream os;
-		os.open("init.json");
-		Json::StyledWriter sw;
-		os << sw.write(root);
-		os.close();
+		m_init = root;
 	}
-	Json::Value reportEvent(int id, Coordinate pos)
+
+	json reportEvent(int id, Coordinate pos)
 	{
-		Json::Value current;
+		json current;
 		current["Round"] = turn;
-		current["CurrentEvent"] = Json::Value::null;
+		current["CurrentEvent"];
 		current["ActivePlayerId"] = id;
-		current["VictimId"].resize(0);
-		current["ActivePos"].append(pos.x);
-		current["ActivePos"].append(pos.y);
-		current["ActivePos"].append(pos.z);
-		current["WinnerId"] = Json::Value::null;
-		current["exp"] = Json::Value::null;
+		current["VictimId"] = json::array();
+		current["ActivePos"].push_back(pos.x);
+		current["ActivePos"].push_back(pos.y);
+		current["ActivePos"].push_back(pos.z);
+		current["WinnerId"];
+		current["exp"];
 		for (int i = 0; i < 3; i++)
-			current["MapSize"].append(map.nowSize);
-		current["MinesLeft"] = Json::Value::null;
-		current["UpgradeType"] = Json::Value::null;
+			current["MapSize"].push_back(map.nowSize);
+		current["MinesLeft"];
+		current["UpgradeType"];
 		return current;
 	}
 	//Map limited_map(const Player& p)
@@ -258,6 +257,8 @@ public:
 	Operation regulate(Operation op, const Player& p)
 	{
 		Operation ret;
+		ret.upgrade = op.upgrade;
+		ret.upgrade_type = op.upgrade_type;
 		//若不合法，一律返回什么都不做none(-1)
 
 		// 检查type在范围内
@@ -267,16 +268,14 @@ public:
 		// 检查target在地图范围内、在攻击/移动距离内
 		if (op.type == 0)
 		{
-            //std::cerr << "into here\n";
 			if (!map.isValid(op.target))
             {
-                //std::cerr << "invalid target\n";
-				return ret;
+                return ret;
             }
-            //std::cerr << "valid here\n";
 			if (map.getDistance(op.target, p.pos) > p.move_range)
 				return ret;
-            //std::cerr << "still valid here\n";
+			if (map.data[op.target.x][op.target.y][op.target.z].BarrierIdx != -1 || map.data[op.target.x][op.target.y][op.target.z].PlayerIdx != -1)
+				return ret;
 		}
 		else if (op.type == 1)
 		{
@@ -361,7 +360,7 @@ public:
 		// TODO: 根据err判断选手程序是否正常返回操作
 	}
 
-	bool Update() //进行一个回合：若有一方死亡，游戏结束，返回true，否则返回false
+bool Update() //进行一个回合：若有一方死亡，游戏结束，返回true，否则返回false
 	{
 		Operation op;
 		int mine_get;
@@ -376,12 +375,17 @@ public:
 					mine_get = player_red.mine_speed;
 				player_red.mines += mine_get;
 				map.mine[map[player_red.pos].MineIdx].num -= mine_get;
+				if (map.mine[map[player_red.pos].MineIdx].num == 0)
+				{
+					map.mine[map[player_red.pos].MineIdx].available = false;
+					map.mine[map[player_red.pos].MineIdx].belong = -1;
+				}
 
-				Json::Value event = reportEvent(0, player_red.pos);
+				json event = reportEvent(0, player_red.pos);
 				event["CurrentEvent"] = "GATHER";
 				event["exp"] = mine_get;
 				event["MinesLeft"] = map.mine[map[player_red.pos].MineIdx].num;
-				m_root.append(event);
+				m_root.push_back(event);
 			}
 		}
 		if (map[player_blue.pos].MineIdx != -1)
@@ -393,11 +397,16 @@ public:
 					mine_get = player_blue.mine_speed;
 				player_blue.mines += mine_get;
 				map.mine[map[player_blue.pos].MineIdx].num -= mine_get;
-				Json::Value event = reportEvent(1, player_blue.pos);
+				if (map.mine[map[player_blue.pos].MineIdx].num == 0)
+				{
+					map.mine[map[player_blue.pos].MineIdx].available = false;
+					map.mine[map[player_blue.pos].MineIdx].belong = -1;
+				}
+				json event = reportEvent(1, player_blue.pos);
 				event["CurrentEvent"] = "GATHER";
 				event["exp"] = mine_get;
 				event["MinesLeft"] = map.mine[map[player_blue.pos].MineIdx].num;
-				m_root.append(event);
+				m_root.push_back(event);
 			}
 		}
 
@@ -425,21 +434,23 @@ public:
 
 		if (op.type == -1)
 		{
-			Json::Value event = reportEvent(0, player_red.pos);
+			json event = reportEvent(0, player_red.pos);
 			event["CurrentEvent"] = "ERROR";
-			m_root.append(event);
+			m_root.push_back(event);
 		}
 		// todo: REPLAY 输出op red
 
 
 
 		//更新移动相关（位置）
-		if (op.type == 0)
+		else if (op.type == 0)
 		{
+			map.data[player_red.pos.x][player_red.pos.y][player_red.pos.z].PlayerIdx = -1;
 			player_red.pos = op.target;
-			Json::Value event = reportEvent(0, player_red.pos);
+			map.data[player_red.pos.x][player_red.pos.y][player_red.pos.z].PlayerIdx = 0;
+			json event = reportEvent(0, player_red.pos);
 			event["CurrentEvent"] = "MOVE";
-			m_root.append(event);
+			m_root.push_back(event);
 			for (auto i : map.enemy_unit)
 			{
 				if (i.id != player_red.id)
@@ -460,10 +471,10 @@ public:
 			if (op.target == player_blue.pos)
 			{
 				player_blue.hp -= player_red.at;
-				Json::Value event = reportEvent(0, player_red.pos);
+				json event = reportEvent(0, player_red.pos);
 				event["CurrentEvent"] = "ATTACK";
-				event["VictimId"].append(player_blue.id);// todo: 由于目前没实现中立单位，故只添加了blue的id
-				m_root.append(event);
+				event["VictimId"].push_back(player_blue.id);// todo: 由于目前没实现中立单位，故只添加了blue的id
+				m_root.push_back(event);
 			}
 		}
 		//更新升级，注意这里升级是在行动之后（可以改顺序)，应当声明
@@ -473,7 +484,7 @@ public:
 				if (player_red.mines >= UPGRADE_COST[op.upgrade_type]) // 检查资源是否足够
 				{
 					upgrade(op.upgrade_type, player_red);
-					Json::Value event = reportEvent(0, player_red.pos);
+					json event = reportEvent(0, player_red.pos);
 					event["CurrentEvent"] = "UPGRADE";
 					switch (op.upgrade_type)
 					{
@@ -498,7 +509,7 @@ public:
 					default:
 						break;
 					}
-					m_root.append(event);
+					m_root.push_back(event);
 				}
 			// todo : 调节升级资源数 
 		}
@@ -525,23 +536,22 @@ public:
 		}
 		
 		op = regulate(op, player_blue);
-
 		if (op.type == -1)
 		{
-			Json::Value event = reportEvent(1, player_blue.pos);
+			json event = reportEvent(1, player_blue.pos);
 			event["CurrentEvent"] = "ERROR";
-			m_root.append(event);
+			m_root.push_back(event);
 		}
 		// todo: REPLAY 输出op blue
 		//更新移动相关（位置）
 		if (op.type == 0)
 		{
-            
-            //std::cerr << "Moved\n" << op.target.x << ' ' << op.target.y << ' ' << op.target.z << '\n';
+			map.data[player_blue.pos.x][player_blue.pos.y][player_blue.pos.z].PlayerIdx = -1;
 			player_blue.pos = op.target;
-			Json::Value event = reportEvent(1, player_blue.pos);
+			map.data[player_blue.pos.x][player_blue.pos.y][player_blue.pos.z].PlayerIdx = 1;
+			json event = reportEvent(1, player_blue.pos);
 			event["CurrentEvent"] = "MOVE";
-			m_root.append(event);
+			m_root.push_back(event);
 			for (auto i : map.enemy_unit)
 			{
 				if (i.id != player_blue.id)
@@ -561,10 +571,10 @@ public:
 			if (op.target == player_red.pos)
 			{
 				player_red.hp -= player_blue.at;
-				Json::Value event = reportEvent(1, player_blue.pos);
+				json event = reportEvent(1, player_blue.pos);
 				event["CurrentEvent"] = "ATTACK";
-				event["VictimId"].append(player_red.id);// todo: 由于目前没实现中立单位，故只添加了red的id
-				m_root.append(event);
+				event["VictimId"].push_back(player_red.id);// todo: 由于目前没实现中立单位，故只添加了red的id
+				m_root.push_back(event);
 			}
 		}
 		//更新升级，注意这里升级是在行动之后（可以改顺序)，应当声明
@@ -574,7 +584,7 @@ public:
 				if (player_blue.mines >= UPGRADE_COST[op.upgrade_type]) // 检查资源是否足够
 				{
 					upgrade(op.upgrade_type, player_blue);
-					Json::Value event = reportEvent(1, player_blue.pos);
+					json event = reportEvent(1, player_blue.pos);
 					event["CurrentEvent"] = "UPGRADE";
 					switch (op.upgrade_type)
 					{
@@ -599,7 +609,7 @@ public:
 					default:
 						break;
 					}
-					m_root.append(event);
+					m_root.push_back(event);
 				}
 			// todo : 调节升级资源数 
 		}
@@ -659,19 +669,19 @@ public:
 		//（todo：伤害结算顺序？如果同时死亡，如何计算？）
 		if (player_red.hp <= 0)
 		{
-			Json::Value event = reportEvent(0, player_red.pos);
+			json event = reportEvent(0, player_red.pos);
 			event["CurrentEvent"] = "DIED";
 			event["WinnerId"] = player_blue.id;
-			m_root.append(event);
+			m_root.push_back(event);
 			std::cerr << "Game ends in turn " << turn << " : player blue wins!" << std::endl;
 			return 1;
 		}
 		if (player_blue.hp <= 0)
 		{
-			Json::Value event = reportEvent(1, player_blue.pos);
+			json event = reportEvent(1, player_blue.pos);
 			event["CurrentEvent"] = "DIED";
 			event["WinnerId"] = player_red.id;
-			m_root.append(event);
+			m_root.push_back(event);
 			std::cerr << "Game ends in turn " << turn << " : player red wins!" << std::endl;
 			return 0;
 		}
