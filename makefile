@@ -10,10 +10,10 @@ header = $(wildcard *.h) $(wildcard *.hpp) $(wildcard ./lib_bot/*.h)
 default: judge player run
 
 judge: lib_bot/Bot.cpp judge.cpp $(header)
-	g++ lib_bot/Bot.cpp judge.cpp -o $@
+	g++ -D __local_test__ lib_bot/Bot.cpp judge.cpp -o $@
 
 player: lib_bot/Bot.cpp player.cpp $(header)
-	g++ lib_bot/Bot.cpp player.cpp -o $@
+	g++ -D __local_test__ lib_bot/Bot.cpp player.cpp -o $@
 
 run:
 	@ "$(JUDGE_EXEC)" $(JUDGE_ARGS) "$(PLAYER_CMD)" "$(PLAYER_CMD)" $(LOGS)
