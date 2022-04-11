@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+
 Operation get_operation_red(const Player& player, const Map& map)   // todo : SDK，玩家编写
 {
     Operation op;
