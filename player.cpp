@@ -1,5 +1,8 @@
+#ifdef __local_test__
 #include "lib_bot/Bot.h"
-//提交时：改为：include "bot.h"
+#else
+#include "bot.h"
+#endif
 
 #include "Game.h"
 #include <stdio.h>
