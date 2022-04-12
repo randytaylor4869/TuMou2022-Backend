@@ -35,7 +35,7 @@ Operation get_operation_red(const Player& player, const Map& map)   // todo : SD
     srand(time(0));
     op.type = 0;
     if(mines >= 100) op.upgrade = 1;
-    op.type = rand() % 6;
+    op.upgrade_type = rand() % 6;
     for(int i = 0; i < 6; i++) //若遇到矿藏点，则本回合选手优先选择采矿
     {
         if(map.data[x + dx[i]][y + dy[i]][z + dz[i]].MineIdx != -1)
@@ -72,19 +72,37 @@ Operation get_operation_red(const Player& player, const Map& map)   // todo : SD
         }
     }
     op.type = 0; //角色默认向远离毒圈的方向移动
+    Coordinate tmp;
     Coordinate center(MAP_SIZE - 1, MAP_SIZE - 1, MAP_SIZE - 1);
     for(int i = 0; i < 6; i++)
     {
-        Coordinate tmp;
         tmp.x = x + dx[i];
         tmp.y = y + dy[i];
         tmp.z = z + dz[i];
-        if(map.getDistance(tmp, center) < map.getDistance(player.pos, center))
+        if(map.isValid(tmp) && map.getDistance(tmp, center) < map.getDistance(player.pos, center))
         {
+            int flag = 1;
+            for(int j = 0; j < map.barrier.size(); j++)
+            {
+                if(map.barrier[j].x == tmp.x && map.barrier[j].y == tmp.y && map.barrier[j].z == tmp.z)
+                {
+                    flag = 0;
+                    break;
+                }
+            }
+            if(flag == 0) continue;
             op.target = tmp;
             return op;
         }
     }
+    for(int i = 0; i < 6; i++)
+    {
+        tmp.x = x + dx[i];
+        tmp.y = y + dy[i];
+        tmp.z = z + dz[i];
+        if(map.isValid(tmp)) op.target = tmp;
+    }
+    op.target = tmp;
     return op;
 }
 
@@ -114,7 +132,7 @@ Operation get_operation_blue(const Player& player, const Map& map)   // todo : S
     srand(time(0));
     op.type = 0;
     if(mines >= 100) op.upgrade = 1;
-    op.type = rand() % 6;
+    op.upgrade_type = rand() % 6;
     for(int i = 0; i < 6; i++) //若遇到矿藏点，则本回合选手优先选择采矿
     {
         if(map.data[x + dx[i]][y + dy[i]][z + dz[i]].MineIdx != -1)
@@ -151,19 +169,39 @@ Operation get_operation_blue(const Player& player, const Map& map)   // todo : S
         }
     }
     op.type = 0; //角色默认向远离毒圈的方向移动
+    Coordinate tmp;
     Coordinate center(MAP_SIZE - 1, MAP_SIZE - 1, MAP_SIZE - 1);
     for(int i = 0; i < 6; i++)
     {
-        Coordinate tmp;
         tmp.x = x + dx[i];
         tmp.y = y + dy[i];
         tmp.z = z + dz[i];
-        if(map.getDistance(tmp, center) < map.getDistance(player.pos, center))
+        if(map.isValid(tmp) && map.getDistance(tmp, center) < map.getDistance(player.pos, center))
         {
+            int flag = 1;
+            for(int j = 0; j < map.barrier.size(); j++)
+            {
+                if(map.barrier[j].x == tmp.x && map.barrier[j].y == tmp.y && map.barrier[j].z == tmp.z)
+                {
+                    flag = 0;
+                    break;
+                }
+            }
+            if(flag == 0) continue;
             op.target = tmp;
             return op;
         }
     }
+    srand(time(NULL));
+    int randomMove = rand() % 6;
+    for(int i = 0; i < 6; i++)
+    {
+        tmp.x = x + dx[i];
+        tmp.y = y + dy[i];
+        tmp.z = z + dz[i];
+        if(map.isValid(tmp)) op.target = tmp;
+    }
+    op.target = tmp;
     return op;
     
 }
