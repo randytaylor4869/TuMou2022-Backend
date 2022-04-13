@@ -49,6 +49,8 @@ int main(int argc, char *argv[])
         printf("The winner is player %d\n", stat);
     else if(stat == 2)
         printf("Draw\n");
+    else
+        printf("Error Code\n", stat);
     //输出json
     nlohmann::json list;
     list["InitialState"] = game->m_init;
