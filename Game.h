@@ -673,7 +673,6 @@ public:
 			event["WinnerId"] = player_blue.id;
 			m_root.push_back(event);
 			std::cerr << "Game ends in turn " << turn << " : player blue wins!" << std::endl;
-			std::cerr << "Game ends in turn " << turn << " : player blue wins!" << std::endl;
 			return 1;
 		}
 		if (player_blue.hp <= 0)
