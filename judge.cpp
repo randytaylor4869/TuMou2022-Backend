@@ -47,8 +47,8 @@ int main(int argc, char *argv[])
     /* Write the report to stdout */
     if(stat == 0 || stat == 1)
         printf("The winner is player %d\n", stat);
-    else
-        printf("Game Ends Abnormally with code %d\n", stat);
+    else if(stat == 2)
+        printf("Draw\n");
     //输出json
     nlohmann::json list;
     list["InitialState"] = game->m_init;
