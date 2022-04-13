@@ -666,13 +666,13 @@ public:
 				break;
 		}
 		//终局结算
-		//（todo：伤害结算顺序？如果同时死亡，如何计算？）
 		if (player_red.hp <= 0)
 		{
 			json event = reportEvent(0, player_red.pos);
 			event["CurrentEvent"] = "DIED";
 			event["WinnerId"] = player_blue.id;
 			m_root.push_back(event);
+			std::cerr << "Game ends in turn " << turn << " : player blue wins!" << std::endl;
 			std::cerr << "Game ends in turn " << turn << " : player blue wins!" << std::endl;
 			return 1;
 		}
@@ -685,10 +685,25 @@ public:
 			std::cerr << "Game ends in turn " << turn << " : player red wins!" << std::endl;
 			return 0;
 		}
-		return -1; // 出错，没有死亡
-		 // cout << "Game ends in turn " << turn << " : Error, no one die but stop." << endl;
-		//输出到REPLAY
-
+		if (player_red.hp < player_blue.hp)
+		{
+			//todo:json输出
+			std::cerr << "Game ends in turn " << turn << " : player blue wins!" << std::endl;
+			return 1;
+		}
+		if (player_red.hp > player_blue.hp)
+		{
+			//todo:json输出
+			std::cerr << "Game ends in turn " << turn << " : player red wins!" << std::endl;
+			return 0;
+		}
+		else
+		{
+			//todo:json输出
+			std::cerr << "Game ends in turn " << turn << " : draw!" << std::endl;
+			return 2;
+		}
+		return -1;
 	}
 
 };
