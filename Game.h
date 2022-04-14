@@ -185,7 +185,7 @@ public:
 			tmp_array.push_back(map.barrier[i].x);
 			tmp_array.push_back(map.barrier[i].y);
 			tmp_array.push_back(map.barrier[i].z);
-			maps["Barrier"].push_back(tmp_array);
+			maps["barriers"].push_back(tmp_array);
 		}
 		for (int i = 0; i < map.mine_num; i++)
 		{
@@ -194,7 +194,7 @@ public:
 			tmp_array.push_back(map.mine[i].pos.y);
 			tmp_array.push_back(map.mine[i].pos.z);
 			tmp_array.push_back(map.mine[i].num);
-			maps["Resource"].push_back(tmp_array);
+			maps["resources"].push_back(tmp_array);
 		}
 		root["map"] = maps;
 		json players;
@@ -238,12 +238,12 @@ public:
 		current["ActivePos"].push_back(pos.x);
 		current["ActivePos"].push_back(pos.y);
 		current["ActivePos"].push_back(pos.z);
-		current["WinnerId"];
-		current["exp"];
+		current["Exp"] = -1;
 		for (int i = 0; i < 3; i++)
 			current["MapSize"].push_back(map.nowSize);
-		current["MinesLeft"];
-		current["UpgradeType"];
+		current["MinesLeft"] = -1;
+		current["UpgradeType"] = -1;
+		current["WinnerId"] = -1;
 		return current;
 	}
 	//Map limited_map(const Player& p)
@@ -383,7 +383,7 @@ bool Update() //进行一个回合：若有一方死亡，游戏结束，返回t
 
 				json event = reportEvent(0, player_red.pos);
 				event["CurrentEvent"] = "GATHER";
-				event["exp"] = mine_get;
+				event["Exp"] = mine_get;
 				event["MinesLeft"] = map.mine[map[player_red.pos].MineIdx].num;
 				m_root.push_back(event);
 			}
@@ -404,7 +404,7 @@ bool Update() //进行一个回合：若有一方死亡，游戏结束，返回t
 				}
 				json event = reportEvent(1, player_blue.pos);
 				event["CurrentEvent"] = "GATHER";
-				event["exp"] = mine_get;
+				event["Exp"] = mine_get;
 				event["MinesLeft"] = map.mine[map[player_blue.pos].MineIdx].num;
 				m_root.push_back(event);
 			}
@@ -651,7 +651,6 @@ public:
 	Game(int x, int y) : player_id(x), map(buildMap(y)){
 		turn = 0;
 		init_json();
-		//TODO : 对于player来说，不需要生成录像（json）
 	}
 
 	int proc() // 对局入口，返回胜者编号red(0), blue(1)
@@ -675,7 +674,7 @@ public:
 			std::cerr << "Game ends in turn " << turn << " : player blue wins!" << std::endl;
 			return 1;
 		}
-		if (player_blue.hp <= 0)
+		else if (player_blue.hp <= 0)
 		{
 			json event = reportEvent(1, player_blue.pos);
 			event["CurrentEvent"] = "DIED";
@@ -684,21 +683,30 @@ public:
 			std::cerr << "Game ends in turn " << turn << " : player red wins!" << std::endl;
 			return 0;
 		}
-		if (player_red.hp < player_blue.hp)
+		else if (player_red.hp < player_blue.hp)
 		{
-			//todo:json输出
+			json event = reportEvent(1, player_blue.pos);
+			event["CurrentEvent"] = "ENDGAME";
+			event["WinnerId"] = player_blue.id;
+			m_root.push_back(event);
 			std::cerr << "Game ends in turn " << turn << " : player blue wins!" << std::endl;
 			return 1;
 		}
-		if (player_red.hp > player_blue.hp)
+		else if (player_red.hp > player_blue.hp)
 		{
-			//todo:json输出
+			json event = reportEvent(0, player_red.pos);
+			event["CurrentEvent"] = "ENDGAME";
+			event["WinnerId"] = player_red.id;
+			m_root.push_back(event);
 			std::cerr << "Game ends in turn " << turn << " : player red wins!" << std::endl;
 			return 0;
 		}
 		else
 		{
-			//todo:json输出
+			json event = reportEvent(2, player_red.pos);//no winner!!
+			event["CurrentEvent"] = "ENDGAME";
+			event["WinnerId"] = 2;
+			m_root.push_back(event);
 			std::cerr << "Game ends in turn " << turn << " : draw!" << std::endl;
 			return 2;
 		}
