@@ -1,4 +1,8 @@
+#ifdef __local_test__
 #include "lib_bot/Bot.h"
+#else
+#include "bot.h"
+#endif
 
 #include "Game.h"
 #include <stdio.h>
@@ -11,10 +15,13 @@ void bot_judge_finish();
 
 Game *game;
 
+
 Operation get_operation(const Player& player, const Map& map) {Operation op; return op;}
 
 int main(int argc, char *argv[])
 {
+    freopen("output.txt","w",stdout);
+    
     /* Initialize players and make sure there are exactly 2 of them */
     int n = bot_judge_init(argc, argv);
     if (n != 2) {
@@ -40,11 +47,17 @@ int main(int argc, char *argv[])
     /* Write the report to stdout */
     if(stat == 0 || stat == 1)
         printf("The winner is player %d\n", stat);
+    else if(stat == 2)
+        printf("Draw\n");
     else
-        printf("Game Ends Abnormally with code %d\n", stat);
-
+        printf("Error Code\n", stat);
+    //输出json
+    nlohmann::json list;
+    list["InitialState"] = game->m_init;
+    list["list"] = game->m_root;
+    std::cout << list.dump(-1) << std::endl;    
     /* Terminate the players */
     bot_judge_finish();
-
+    std::cerr << "finished.\n" << std::endl;
     return 0;
 }
