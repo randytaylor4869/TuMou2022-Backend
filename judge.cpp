@@ -4,7 +4,7 @@
 #include "bot.h"
 #endif
 
-#include "Game.h"
+#include "TuMou2022/Game.h"
 #include <stdio.h>
 
 // bot
