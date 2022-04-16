@@ -313,28 +313,28 @@ public:
 		{
 		case 0:
 			p.move_range++;
-			p.mines -= UPGRADE_COST[type]
+			p.mines -= UPGRADE_COST[type];
 			break;
 		case 1:
 			p.attack_range++;
-			p.mines -= UPGRADE_COST[type]
+			p.mines -= UPGRADE_COST[type];
 			break;
 		case 2:
 			p.mine_speed++;
-			p.mines -= UPGRADE_COST[type]
+			p.mines -= UPGRADE_COST[type];
 			break;
 		case 3:
 			p.hp = (p.hp + 50 > 100 ? 100 : p.hp + 50); //血量上限100
-			p.mines -= UPGRADE_COST[type]
+			p.mines -= UPGRADE_COST[type];
 			// TODO: += f(turn) ?
 			break;
 		case 4:
 			p.sight_range++;
-			p.mines -= UPGRADE_COST[type]
+			p.mines -= UPGRADE_COST[type];
 			break;
 		case 5:
 			p.at++;
-			p.mines -= UPGRADE_COST[type]
+			p.mines -= UPGRADE_COST[type];
 			break;
 		default:
 			break;
