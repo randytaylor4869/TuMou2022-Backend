@@ -15,7 +15,7 @@
 #include "json.hpp"
 using json = nlohmann::json;
 
-const int UPGRADE_COST[6] = { 100, 100, 100, 100, 100, 100 }; // todo：确定升级类型所需要的mine数
+const int UPGRADE_COST[6] = { 30, 30, 5, 40, 30, 20 }; // todo：确定升级类型所需要的mine数
 
 class Operation
 {
@@ -313,22 +313,28 @@ public:
 		{
 		case 0:
 			p.move_range++;
+			p.mines -= UPGRADE_COST[type];
 			break;
 		case 1:
 			p.attack_range++;
+			p.mines -= UPGRADE_COST[type];
 			break;
 		case 2:
 			p.mine_speed++;
+			p.mines -= UPGRADE_COST[type];
 			break;
 		case 3:
 			p.hp = (p.hp + 50 > 100 ? 100 : p.hp + 50); //血量上限100
+			p.mines -= UPGRADE_COST[type];
 			// TODO: += f(turn) ?
 			break;
 		case 4:
 			p.sight_range++;
+			p.mines -= UPGRADE_COST[type];
 			break;
 		case 5:
 			p.at++;
+			p.mines -= UPGRADE_COST[type];
 			break;
 		default:
 			break;
