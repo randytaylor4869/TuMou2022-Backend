@@ -1,7 +1,7 @@
 #ifdef __local_test__
 #include "lib_bot/Bot.h"
 #else
-#include "bot.h"
+#include <bot.h>
 #endif
 
 #include "TuMou2022/Game.h"
