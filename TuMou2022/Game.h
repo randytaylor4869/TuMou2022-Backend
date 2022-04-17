@@ -244,6 +244,7 @@ public:
 			current["MapSize"].push_back(map.nowSize);
 		current["MinesLeft"] = -1;
 		current["UpgradeType"] = -1;
+		current["BoundaryHurt"] = -1;
 		current["WinnerId"] = -1;
 		return current;
 	}
@@ -634,11 +635,20 @@ bool Update() //进行一个回合：若有一方死亡，游戏结束，返回t
 		//缩圈伤害
 		if (map.getDistance(player_red.pos, Coordinate(MAP_SIZE-1, MAP_SIZE-1, MAP_SIZE-1)) > map.nowSize)
 		{
-			player_red.hp -= 10; // TODO: 调整这个值，随时间变化？
+			int hurt = 10;// TODO: 调整这个值，随时间变化？
+			player_red.hp -= hurt; 
+			json event = reportEvent(0, player_red.pos);
+			event["CurrentEvent"] = "BOUNDARYHURT";
+			event["BoundaryHurt"] = hurt;
+			
 		}
 		if (map.getDistance(player_blue.pos, Coordinate(MAP_SIZE-1, MAP_SIZE-1, MAP_SIZE-1)) > map.nowSize)
 		{
-			player_blue.hp -= 10; // TODO: 调整这个值，随时间变化？
+			int hurt = 10;// TODO: 调整这个值，随时间变化？
+			player_blue.hp -= hurt; 
+			json event = reportEvent(1, player_blue.pos);
+			event["CurrentEvent"] = "BOUNDARYHURT";
+			event["BoundaryHurt"] = hurt;
 		}
 
 		//判断存活状态
