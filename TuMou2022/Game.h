@@ -640,6 +640,7 @@ bool Update() //进行一个回合：若有一方死亡，游戏结束，返回t
 			json event = reportEvent(0, player_red.pos);
 			event["CurrentEvent"] = "BOUNDARYHURT";
 			event["BoundaryHurt"] = hurt;
+			m_root.push_back(event);
 			
 		}
 		if (map.getDistance(player_blue.pos, Coordinate(MAP_SIZE-1, MAP_SIZE-1, MAP_SIZE-1)) > map.nowSize)
@@ -649,6 +650,7 @@ bool Update() //进行一个回合：若有一方死亡，游戏结束，返回t
 			json event = reportEvent(1, player_blue.pos);
 			event["CurrentEvent"] = "BOUNDARYHURT";
 			event["BoundaryHurt"] = hurt;
+			m_root.push_back(event);
 		}
 
 		//判断存活状态
