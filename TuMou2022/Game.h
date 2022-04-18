@@ -701,12 +701,20 @@ public:
 		{
 			std::cerr << "Player red error. Code : " << err << std::endl;
 			//todo: json output
+			json event = reportEvent(0, player_red.pos);
+			event["CurrentEvent"] = "TIMEOUT";
+			event["WinnerId"] = player_blue.id;
+			m_root.push_back(event);
 			return 1;
 		}
 		else if (err < 0) // 蓝方出错结束
 		{
 			std::cerr << "Player blue error. Code : " << err << std::endl;
 			//todo: json output
+			json event = reportEvent(1, player_blue.pos);
+			event["CurrentEvent"] = "TIMEOUT";
+			event["WinnerId"] = player_red.id;
+			m_root.push_back(event);
 			return 0;
 		}
 		//终局结算
