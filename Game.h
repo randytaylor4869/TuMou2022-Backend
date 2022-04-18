@@ -23,9 +23,9 @@ public:
 	int type; // 移动(0) 或 攻击(1) 或 none(-1)
 	Coordinate target;  // 移动/攻击目标
 
-	bool upgrade; //是否升级
+	int upgrade; //是否升级
 	int upgrade_type; //升级类型：0-移动速度， 1-攻击范围， 2-采集速度， 3-回血，4-视野范围，5-攻击力
-	Operation() : type(-1), upgrade(false) {};
+	Operation() : type(-1), upgrade(0) {};
 };
 
 
