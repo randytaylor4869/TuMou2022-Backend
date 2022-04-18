@@ -1,10 +1,10 @@
 #ifdef __local_test__
 #include "lib_bot/Bot.h"
 #else
-#include "bot.h"
+#include <bot.h>
 #endif
 
-#include "Game.h"
+#include "TuMou2022/Game.h"
 #include <stdio.h>
 
 // bot
@@ -45,17 +45,18 @@ int main(int argc, char *argv[])
     int stat = game->proc();
 
     /* Write the report to stdout */
-    if(stat == 0 || stat == 1)
-        printf("The winner is player %d\n", stat);
-    else if(stat == 2)
-        printf("Draw\n");
+    if(stat == 0 || stat == 1 || stat == 2)
+    {
+        //输出json
+        nlohmann::json list;
+        list["InitialState"] = game->m_init;
+        list["list"] = game->m_root;
+        std::cout << list.dump(-1); 
+    }
     else
-        printf("Error Code\n", stat);
-    //输出json
-    nlohmann::json list;
-    list["InitialState"] = game->m_init;
-    list["list"] = game->m_root;
-    std::cout << list.dump(-1) << std::endl;    
+    {
+        std::cout << "Error";
+    } 
     /* Terminate the players */
     bot_judge_finish();
     std::cerr << "finished.\n" << std::endl;

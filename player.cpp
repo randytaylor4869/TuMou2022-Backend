@@ -1,10 +1,10 @@
 #ifdef __local_test__
 #include "lib_bot/Bot.h"
 #else
-#include "bot.h"
+#include <bot.h>
 #endif
 
-#include "Game.h"
+#include "TuMou2022/Game.h"
 #include <stdio.h>
 #include <stdlib.h>
 
