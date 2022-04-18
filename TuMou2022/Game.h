@@ -359,7 +359,14 @@ public:
 	}
 	Operation judge_proc(int current_player, int* err)
 	{
-		char* s = bot_judge_recv(current_player, err, 2000);
+		int o_len;
+		char* s = bot_judge_recv(current_player, &o_len, 2000);
+		*err = 0;
+		if(s == 0)
+		{
+			*err = o_len;
+			return Operation();
+		}
 		bot_judge_send(current_player^1, s);
 		Operation op;
 		sscanf(s, "%d %d %d %d %d %d", &op.type, &op.target.x, &op.target.y, &op.target.z, &op.upgrade, &op.upgrade_type);
@@ -368,7 +375,7 @@ public:
 		// TODO: 根据err判断选手程序是否正常返回操作
 	}
 
-bool Update() //进行一个回合：若有一方死亡，游戏结束，返回true，否则返回false
+	bool Update(int* err) //进行一个回合：若有一方死亡，游戏结束，返回true，否则返回false
 	{
 		Operation op;
 		int mine_get;
@@ -424,7 +431,6 @@ bool Update() //进行一个回合：若有一方死亡，游戏结束，返回t
 		//Map(map,player_red);
 
 		//op = get_operation_red(player_red, tmp);
-		int err;
 		if(player_id == 0)
 		{
 			op = get_operation(player_red, player_map(player_red)); // 暂时！
@@ -434,7 +440,9 @@ bool Update() //进行一个回合：若有一方死亡，游戏结束，返回t
 			op = get_operation_opponent();
 		else // judge -1
 		{
-			op = judge_proc(0, &err);
+			op = judge_proc(0, err);
+			if(*err)
+				return true;
 			// todo : process err
 		}
 
@@ -539,8 +547,12 @@ bool Update() //进行一个回合：若有一方死亡，游戏结束，返回t
 			op = get_operation_opponent();
 		else // judge -1
 		{
-			op = judge_proc(1, &err);
-			// todo : process err
+			op = judge_proc(1, err);
+			if(*err)
+			{
+				*err *= -1;
+				return true;
+			}
 		}
 		
 		op = regulate(op, player_blue);
@@ -675,16 +687,30 @@ public:
 	int proc() // 对局入口，返回胜者编号red(0), blue(1)
 	{
 		init_json();
+		int err;
 		for (turn = 1; turn <= TURN_COUNT; turn++)
 		{
 			//std::cerr << "turn" << turn << std::endl;
             //std::cerr << player_red.hp << ' '<< player_blue.hp << std::endl;
             //std::cerr << map.getDistance(player_red.pos, Coordinate(MAP_SIZE-1, MAP_SIZE-1, MAP_SIZE-1)) << ' ' << map.getDistance(player_blue.pos, Coordinate(MAP_SIZE-1, MAP_SIZE-1, MAP_SIZE-1)) << ' ' << map.nowSize << std::endl;
-			if (Update())
+			
+			if (Update(&err))
 				break;
 		}
+		if(err > 0) // 红方出错结束
+		{
+			std::cerr << "Player red error. Code : " << err << std::endl;
+			//todo: json output
+			return 1;
+		}
+		else if (err < 0) // 蓝方出错结束
+		{
+			std::cerr << "Player blue error. Code : " << err << std::endl;
+			//todo: json output
+			return 0;
+		}
 		//终局结算
-		if (player_red.hp <= 0)
+		else if (player_red.hp <= 0)
 		{
 			json event = reportEvent(0, player_red.pos);
 			event["CurrentEvent"] = "DIED";
