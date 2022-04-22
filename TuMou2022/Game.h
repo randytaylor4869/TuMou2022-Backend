@@ -639,7 +639,7 @@ public:
 			return true;
 
 		//缩圈
-		if (turn >= 0.75 * TURN_COUNT && turn % 5 == 0)
+		if (turn >= 0.75 * TURN_COUNT )
 		{
 			if (map.nowSize)
 				map.nowSize--;
