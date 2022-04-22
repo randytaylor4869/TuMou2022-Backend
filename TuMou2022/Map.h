@@ -11,7 +11,7 @@
 #include <cmath>
 #include <iostream>
 
-const int TURN_COUNT = 36 * 4;//回合数
+const int TURN_COUNT = 100;//回合数
 const int MAP_SIZE = 25;//地图的边长
 const int MINE_NUM = 100;
 
