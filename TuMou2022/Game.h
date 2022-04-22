@@ -322,11 +322,11 @@ public:
 			p.mines -= UPGRADE_COST[type];
 			break;
 		case 2:
-			p.mine_speed++;
+			p.mine_speed += 5;
 			p.mines -= UPGRADE_COST[type];
 			break;
 		case 3:
-			p.hp = (p.hp + 50 > 100 ? 100 : p.hp + 50); //血量上限100
+			p.hp = (p.hp + 30 > 100 ? 100 : p.hp + 30); //血量上限100
 			p.mines -= UPGRADE_COST[type];
 			// TODO: += f(turn) ?
 			break;
@@ -335,7 +335,7 @@ public:
 			p.mines -= UPGRADE_COST[type];
 			break;
 		case 5:
-			p.at++;
+			p.at += 5;
 			p.mines -= UPGRADE_COST[type];
 			break;
 		default:
@@ -499,33 +499,37 @@ public:
 			if (op.upgrade_type >= 0 && op.upgrade_type <= 5) // 检查升级类型是否合法
 				if (player_red.mines >= UPGRADE_COST[op.upgrade_type]) // 检查资源是否足够
 				{
-					upgrade(op.upgrade_type, player_red);
-					json event = reportEvent(0, player_red.pos);
-					event["CurrentEvent"] = "UPGRADE";
-					switch (op.upgrade_type)
+					if(!(op.upgrade_type == 2 && player_red.mine_speed >= 30) &&
+					   !(op.upgrade_type == 5 && player_red.at >= 50) )
 					{
-					case 0:
-						event["UpgradeType"] = "move_range";
-						break;
-					case 1:
-						event["UpgradeType"] = "attack_range";
-						break;
-					case 2:
-						event["UpgradeType"] = "mine_speed";
-						break;
-					case 3:
-						event["UpgradeType"] = "hp";
-						break;
-					case 4:
-						event["UpgradeType"] = "sight_range";
-						break;
-					case 5:
-						event["UpgradeType"] = "atk";
-						break;
-					default:
-						break;
+						upgrade(op.upgrade_type, player_red);
+						json event = reportEvent(0, player_red.pos);
+						event["CurrentEvent"] = "UPGRADE";
+						switch (op.upgrade_type)
+						{
+						case 0:
+							event["UpgradeType"] = "move_range";
+							break;
+						case 1:
+							event["UpgradeType"] = "attack_range";
+							break;
+						case 2:
+							event["UpgradeType"] = "mine_speed";
+							break;
+						case 3:
+							event["UpgradeType"] = "hp";
+							break;
+						case 4:
+							event["UpgradeType"] = "sight_range";
+							break;
+						case 5:
+							event["UpgradeType"] = "atk";
+							break;
+						default:
+							break;
+						}
+						m_root.push_back(event);
 					}
-					m_root.push_back(event);
 				}
 			// todo : 调节升级资源数 
 		}
