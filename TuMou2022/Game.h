@@ -259,6 +259,7 @@ public:
 	Operation regulate(Operation op, const Player& p)
 	{
 		Operation ret;
+		ret.type = -2;
 		ret.upgrade = op.upgrade;
 		ret.upgrade_type = op.upgrade_type;
 		//若不合法，一律返回什么都不做none(-1)
@@ -451,6 +452,12 @@ public:
 		if (op.type == -1)
 		{
 			json event = reportEvent(0, player_red.pos);
+			event["CurrentEvent"] = "DONOTHING";
+			m_root.push_back(event);
+		}
+		else if (op.type == -2)
+		{
+			json event = reportEvent(0, player_red.pos);
 			event["CurrentEvent"] = "ERROR";
 			m_root.push_back(event);
 		}
@@ -563,12 +570,18 @@ public:
 		if (op.type == -1)
 		{
 			json event = reportEvent(1, player_blue.pos);
+			event["CurrentEvent"] = "DONOTHING";
+			m_root.push_back(event);
+		}
+		else if (op.type == -2)
+		{
+			json event = reportEvent(1, player_blue.pos);
 			event["CurrentEvent"] = "ERROR";
 			m_root.push_back(event);
 		}
 		// todo: REPLAY 输出op blue
 		//更新移动相关（位置）
-		if (op.type == 0)
+		else if (op.type == 0)
 		{
 			map.data[player_blue.pos.x][player_blue.pos.y][player_blue.pos.z].PlayerIdx = -1;
 			player_blue.pos = op.target;
