@@ -8,209 +8,172 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+//////////////////////////////////////////////////////////////////////
+//                       BEGINNING OF MACROS                        //
+//////////////////////////////////////////////////////////////////////
+#include <utility>
+#include <queue>
+#include <algorithm>
+//////////////////////////////////////////////////////////////////////
+//                           END OF MACROS                          //
+//////////////////////////////////////////////////////////////////////
 
-Operation get_operation_red(const Player& player, const Map& map)   // todo : SDK，玩家编写
+#define MAP_SIZE 25
+#define K (MAP_SIZE - 1)
+
+////////////////////////////////////////////////////////////////////////////
+//                       BEGINNING OF COPIED CODES                        //
+////////////////////////////////////////////////////////////////////////////
+
+Point myData[2 * MAP_SIZE - 1][2 * MAP_SIZE - 1]; // 可以在此存储角色探索到的地图信息
+std::vector<Point> pointsInView;                  // 角色当前视野范围内的点
+std::vector<Point> pointsInAttack;                // 角色当前攻击范围内的点
+std::vector<Point> pointsInMove;                  // 角色当前移动范围内的点
+
+std::vector<Coordinate> ADJ = {{0, 1, -1}, {1, 0, -1}, {1, -1, 0}, {0, -1, 1}, {-1, 0, 1}, {-1, 1, 0}}; // 从左下方开始，逆时针顺序
+
+int vis[2 * MAP_SIZE - 1][2 * MAP_SIZE - 1]; // used on multiple occasions
+
+void init()
 {
-    Operation op;
-    //以下变量为Player类中的public成员，玩家可以直接从Player中获取相关
-    int x = player.pos.x;
-    int y = player.pos.y;
-    int z = player.pos.z;    //x, y, z为角色的位置信息
-    int attack_range = player.attack_range;    //角色的攻击范围
-    int move_range = player.move_range;        //角色的移动范围
-    int mine_speed = player.mine_speed;        //角色的采矿速度
-    int at = player.at;                        //角色的攻击力
-    int hp = player.hp;                        //角色的生命值
-    int mines = player.mines;                  //角色的采矿数量
-
-    //以下变量为map类中的public成员，玩家可以直接从map中获取相关信息
-    std::vector<Mine> mine = map.mine;         //矿物信息
-    std::vector<Coordinate> barrier;           //障碍物信息
-    int nowSize = map.nowSize;                 //地图大小
-    int viewSize = map.viewSize;               //视野范围
-    int barrier_num = map.barrier_num;         //障碍物数量
-    int enemy_num = map.enemy_num;             //敌方数量
-
-    //玩家可以根据以上获取的信息来进行决策
-    srand(time(0));
-    op.type = 0;
-    if(mines >= 100) op.upgrade = 1;
-    op.upgrade_type = rand() % 6;
-    for(int i = 0; i < 6; i++) //若遇到矿藏点，则本回合选手优先选择采矿
-    {
-        if(map.data[x + dx[i]][y + dy[i]][z + dz[i]].MineIdx != -1)
-        {
-            op.target.x = x + dx[i];
-            op.target.y = y + dy[i];
-            op.target.z = z + dz[i];
-            return op;
-        } 
-    }
-    for(int i = 0; i < 6; i++)
-    {
-        if(map.data[x + dx[i]][y + dy[i]][z + dz[i]].PlayerIdx != player.id) 
-        {
-            for(int j = 0 ; j < map.enemy_unit.size(); j++)
-            {
-                if(map.enemy_unit[j].hp < player.hp && map.enemy_unit[j].at < player.at) //若选手遇到敌方，且选手的生命值和攻击力均大于敌方，则选择进攻
-                {
-                    op.type = 1;
-                    op.target.x = map.enemy_unit[j].pos.x;
-                    op.target.y = map.enemy_unit[j].pos.y;
-                    op.target.z = map.enemy_unit[j].pos.z;
-                    return op;
-                }
-                else if(map.enemy_unit[j].hp > player.hp && map.enemy_unit[j].at > player.at) //若选手遇到敌方，且选手的生命值和攻击力均小于敌方，则选择往反方向逃跑
-                {
-                    op.type = 0;
-                    op.target.x = x - dx[i];
-                    op.target.y = y - dy[i];
-                    op.target.z = z - dz[i];
-                    return op;
-                }
-            }
-        }
-    }
-    op.type = 0; //角色默认向远离毒圈的方向移动
-    Coordinate tmp;
-    Coordinate center(MAP_SIZE - 1, MAP_SIZE - 1, MAP_SIZE - 1);
-    for(int i = 0; i < 6; i++)
-    {
-        tmp.x = x + dx[i];
-        tmp.y = y + dy[i];
-        tmp.z = z + dz[i];
-        if(map.isValid(tmp) && map.getDistance(tmp, center) < map.getDistance(player.pos, center))
-        {
-            int flag = 1;
-            for(int j = 0; j < map.barrier.size(); j++)
-            {
-                if(map.barrier[j].x == tmp.x && map.barrier[j].y == tmp.y && map.barrier[j].z == tmp.z)
-                {
-                    flag = 0;
-                    break;
-                }
-            }
-            if(flag == 0) continue;
-            op.target = tmp;
-            return op;
-        }
-    }
-    for(int i = 0; i < 6; i++)
-    {
-        tmp.x = x + dx[i];
-        tmp.y = y + dy[i];
-        tmp.z = z + dz[i];
-        if(map.isValid(tmp)) op.target = tmp;
-    }
-    op.target = tmp;
-    return op;
+    // Executed before getInfo
 }
 
-Operation get_operation_blue(const Player& player, const Map& map)   // todo : SDK，玩家编写
+void getInfo(const Player &player, const Map &map)
 {
+    // Getting points
+    pointsInView.clear();
+    pointsInAttack.clear();
+    pointsInMove.clear();
+
+    // Get points in view range and attack range
+    // TODO: can be improved if time permits
+    for (int i = 0; i < 2 * MAP_SIZE - 1; i++)
+    {
+        for (int j = 0; j < 2 * MAP_SIZE - 1; j++)
+        {
+            int k = 3 * K - i - j;
+            Coordinate tmp = {i, j, k};
+            if (map.isValid(tmp))
+            {
+                if (map.getDistance(tmp, player.pos) <= player.sight_range - 1)
+                {
+                    pointsInView.push_back(map.data[i][j][k]);
+                    myData[i][j] = map.data[i][j][k];
+                }
+                if (map.getDistance(tmp, player.pos) <= player.attack_range)
+                {
+                    pointsInAttack.push_back(map.data[i][j][k]);
+                }
+            }
+        }
+    }
+
+    // Get points in move range
+    class compare
+    {
+    public:
+        bool operator()(const std::pair<Coordinate, int> &p1, const std::pair<Coordinate, int> &p2)
+        {
+            return p1.second > p2.second;
+        }
+    };
+
+    // Initializations
+    std::vector<Coordinate> found;
+    std::priority_queue<std::pair<Coordinate, int>, std::vector<std::pair<Coordinate, int>>, compare> q;
+    q.push({player.pos, 0});
+
+    for (int i = 0; i < 2 * MAP_SIZE - 1; i++)
+    {
+        for (int j = 0; j < 2 * MAP_SIZE - 1; j++)
+        {
+            vis[i][j] = 0;
+        }
+    }
+
+    while (!q.empty())
+    {
+        std::pair<Coordinate, int> p = q.top();
+        Coordinate tmp = p.first;
+        q.pop();
+
+        if (p.second > player.move_range)
+        {
+            // Unreachable
+            break;
+        }
+
+        // Check if the point has been discovered
+        if (!vis[tmp.x][tmp.y])
+        {
+            vis[tmp.x][tmp.y] = 1;
+            if (map.data[tmp.x][tmp.y][tmp.z].BarrierIdx < 0)
+            {
+                pointsInMove.push_back(map.data[tmp.x][tmp.y][tmp.z]);
+                for (const Coordinate &a : ADJ)
+                {
+                    if (map.isValid(tmp.x + a.x, tmp.y + a.y, tmp.z + a.z))
+                    {
+                        q.push({{tmp.x + a.x, tmp.y + a.y, tmp.z + a.z}, p.second + 1});
+                    }
+                }
+            }
+        }
+    }
+}
+
+Operation get_operation(const Player &player, const Map &map)
+{
+    // Initialization
+    init();
+    getInfo(player, map);
+
+    // Algorithms begin here
     Operation op;
-    //以下变量为Player类中的public成员，玩家可以直接从Player中获取相关
-    int x = player.pos.x;
-    int y = player.pos.y;
-    int z = player.pos.z;    //x, y, z为角色的位置信息
-    int attack_range = player.attack_range;    //角色的攻击范围
-    int move_range = player.move_range;        //角色的移动范围
-    int mine_speed = player.mine_speed;        //角色的采矿速度
-    int at = player.at;                        //角色的攻击力
-    int hp = player.hp;                        //角色的生命值
-    int mines = player.mines;                  //角色的采矿数量
+    // vis[player.pos.x][player.pos.y] = 1;
 
-    //以下变量为map类中的public成员，玩家可以直接从map中获取相关信息
-    std::vector<Mine> mine = map.mine;         //矿物信息
-    std::vector<Coordinate> barrier;           //障碍物信息
-    int nowSize = map.nowSize;                 //地图大小
-    int viewSize = map.viewSize;               //视野范围
-    int barrier_num = map.barrier_num;         //障碍物数量
-    int enemy_num = map.enemy_num;             //敌方数量
-
-    //玩家可以根据以上获取的信息来进行决策
-    srand(time(0));
-    op.type = 0;
-    if(mines >= 100) op.upgrade = 1;
-    op.upgrade_type = rand() % 6;
-    for(int i = 0; i < 6; i++) //若遇到矿藏点，则本回合选手优先选择采矿
-    {
-        if(map.data[x + dx[i]][y + dy[i]][z + dz[i]].MineIdx != -1)
-        {
-            op.target.x = x + dx[i];
-            op.target.y = y + dy[i];
-            op.target.z = z + dz[i];
-            return op;
-        } 
-    }
-    for(int i = 0; i < 6; i++)
-    {
-        if(map.data[x + dx[i]][y + dy[i]][z + dz[i]].PlayerIdx != player.id) 
-        {
-            for(int j = 0 ; j < map.enemy_unit.size(); j++)
-            {
-                if(map.enemy_unit[j].hp < player.hp && map.enemy_unit[j].at < player.at) //若选手遇到敌方，且选手的生命值和攻击力均大于敌方，则选择进攻
-                {
-                    op.type = 1;
-                    op.target.x = map.enemy_unit[j].pos.x;
-                    op.target.y = map.enemy_unit[j].pos.y;
-                    op.target.z = map.enemy_unit[j].pos.z;
-                    return op;
-                }
-                else if(map.enemy_unit[j].hp > player.hp && map.enemy_unit[j].at > player.at) //若选手遇到敌方，且选手的生命值和攻击力均小于敌方，则选择往反方向逃跑
-                {
-                    op.type = 0;
-                    op.target.x = x - dx[i];
-                    op.target.y = y - dy[i];
-                    op.target.z = z - dz[i];
-                    return op;
-                }
-            }
-        }
-    }
-    op.type = 0; //角色默认向远离毒圈的方向移动
-    Coordinate tmp;
-    Coordinate center(MAP_SIZE - 1, MAP_SIZE - 1, MAP_SIZE - 1);
-    for(int i = 0; i < 6; i++)
-    {
-        tmp.x = x + dx[i];
-        tmp.y = y + dy[i];
-        tmp.z = z + dz[i];
-        if(map.isValid(tmp) && map.getDistance(tmp, center) < map.getDistance(player.pos, center))
-        {
-            int flag = 1;
-            for(int j = 0; j < map.barrier.size(); j++)
-            {
-                if(map.barrier[j].x == tmp.x && map.barrier[j].y == tmp.y && map.barrier[j].z == tmp.z)
-                {
-                    flag = 0;
-                    break;
-                }
-            }
-            if(flag == 0) continue;
-            op.target = tmp;
-            return op;
-        }
-    }
+    // Upgrade type: randomly chosen (if possible)
     srand(time(NULL));
-    int randomMove = rand() % 6;
-    for(int i = 0; i < 6; i++)
+    int uptype = rand() % 6;
+    if (player.mines >= UPGRADE_COST[uptype])
     {
-        tmp.x = x + dx[i];
-        tmp.y = y + dy[i];
-        tmp.z = z + dz[i];
-        if(map.isValid(tmp)) op.target = tmp;
+        op.upgrade_type = uptype;
+        op.upgrade = 1;
     }
-    op.target = tmp;
+
+    // Attack first if the enemy is in the attacking range
+    for (int i = 0; i < pointsInAttack.size(); i++)
+    {
+        if (pointsInAttack[i].PlayerIdx != player.id && pointsInAttack[i].PlayerIdx != -1)
+        {
+            op.type = 1;
+            op.target.x = pointsInAttack[i].x;
+            op.target.y = pointsInAttack[i].y;
+            op.target.z = pointsInAttack[i].z;
+            return op;
+        }
+    }
+
+    // Check for reachable blocks; move to the block when found
+    if (pointsInMove.size() > 0)
+    {
+        int i = rand() % pointsInMove.size();
+        op.type = 0;
+        op.target.x = pointsInMove[i].x;
+        op.target.y = pointsInMove[i].y;
+        op.target.z = pointsInMove[i].z;
+        return op;
+    }
+
     return op;
-    
 }
 
-Operation get_operation(const Player& player, const Map& map)
-{
-    return get_operation_red(player, map);
-}
+////////////////////////////////////////////////////////////////////////////
+//                           END OF COPIED CODES                          //
+////////////////////////////////////////////////////////////////////////////
 
+/*以下部分无需修改*/
 Game *game;
 
 int main()
