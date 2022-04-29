@@ -154,12 +154,33 @@ public:
 				mymap.data[i.x][i.y][i.z].BarrierIdx = mymap.barrier_num++;
 			}
 		}
-		for (auto i : map.enemy_unit)
+		/*for (auto i : map.enemy_unit)
 		{
-			if (mymap.getDistance(player.pos, i.pos) <= mymap.viewSize - 1)
+			if (1)//mymap.getDistance(player.pos, i.pos) <= mymap.viewSize - 1)
 			{
-				mymap.enemy_unit.push_back(i);
-				mymap.data[i.pos.x][i.pos.y][i.pos.z].PlayerIdx = i.id;
+				if( i.id != player.id)
+				{
+					mymap.enemy_unit.push_back(i);
+					mymap.data[i.pos.x][i.pos.y][i.pos.z].PlayerIdx = i.id;
+					mymap.enemy_num++;
+				}
+			}
+		}*/
+		if(player.id == 0)
+		{
+			if(mymap.getDistance(player.pos, player_blue.pos) <= mymap.viewSize - 1)
+			{
+				mymap.enemy_unit.push_back(player_blue);
+				mymap.data[player_blue.pos.x][player_blue.pos.y][player_blue.pos.z].PlayerIdx = 1;
+				mymap.enemy_num++;
+			}
+		}
+		else
+		{
+			if(mymap.getDistance(player.pos, player_red.pos) <= mymap.viewSize - 1)
+			{
+				mymap.enemy_unit.push_back(player_red);
+				mymap.data[player_red.pos.x][player_red.pos.y][player_red.pos.z].PlayerIdx = 0;
 				mymap.enemy_num++;
 			}
 		}
@@ -256,7 +277,7 @@ public:
 
 	//Map limited_map = Map(map,player_red);		//返回玩家p的视野地图
 
-	Operation regulate(Operation op, const Player& p)
+	Operation regulate(Operation op, const Player& p, int &err)
 	{
 		Operation ret;
 		ret.type = -2;
@@ -266,32 +287,47 @@ public:
 
 		// 检查type在范围内
 		if (op.type < -1 || op.type > 1)
+		{
+			err =  -1;
 			return ret;
+		}
 
 		// 检查target在地图范围内、在攻击/移动距离内
 		if (op.type == 0)
 		{
 			if (!map.isValid(op.target))
             {
+				err = -2;
                 return ret;
             }
 			if (map.getDistance(op.target, p.pos) > p.move_range)
+			{
+				err = -3;
 				return ret;
-			if (map.data[op.target.x][op.target.y][op.target.z].BarrierIdx != -1 || map.data[op.target.x][op.target.y][op.target.z].PlayerIdx != -1)
+			}
+			if (map.data[op.target.x][op.target.y][op.target.z].BarrierIdx != -1 )
+			{
+				err = -4;
 				return ret;
+			}
+			if(map.data[op.target.x][op.target.y][op.target.z].PlayerIdx != -1 && map.data[op.target.x][op.target.y][op.target.z].PlayerIdx != p.id)
+			{
+				err = 4;
+				return ret;
+			}
 		}
 		else if (op.type == 1)
 		{
 			if (!map.isValid(op.target))
+			{
+				err = -5;
 				return ret;
+			}
 			if (map.getDistance(op.target, p.pos) > p.attack_range)
+			{
+				err = -6;
 				return ret;
-		}
-		//前10回合攻击保护
-		if (op.type == 1)
-		{
-			if (turn <= 10) // todo : 10?
-				return ret;
+			}
 		}
 
 		//检查移动的终点是否合法
@@ -434,20 +470,39 @@ public:
 		//op = get_operation_red(player_red, tmp);
 		if(player_id == 0)
 		{
-			op = get_operation(player_red, player_map(player_red)); // 暂时！
+			/*
+			std::cerr << "turn: " << turn << std::endl;
+			std::cerr << player_red.pos.x << " " << player_red.pos.y << " " << player_red.pos.z << std::endl;
+			std::cerr << player_blue.pos.x << " " << player_blue.pos.y << " " << player_blue.pos.z << std::endl;
+			std::cerr << map[player_red.pos].PlayerIdx << " " << map[player_blue.pos].PlayerIdx << std::endl;
+			*/
+
+			op = get_operation(player_red, player_map(player_red)); 
 			send_operation(op);
 		}
 		else if(player_id == 1)
+		{
 			op = get_operation_opponent();
+		}
 		else // judge -1
 		{
+			/*
+			std::cerr << "turn: " << turn << std::endl;
+			std::cerr << player_red.pos.x << " " << player_red.pos.y << " " << player_red.pos.z << std::endl;
+			std::cerr << player_blue.pos.x << " " << player_blue.pos.y << " " << player_blue.pos.z << std::endl;
+			std::cerr << map[player_red.pos].PlayerIdx << " " << map[player_blue.pos].PlayerIdx << std::endl;
+			*/
+
 			op = judge_proc(0, err);
+			//std::cerr << "Target: " << op.target.x << ' ' << op.target.y << ' ' << op.target.z << '\n';
+
 			if(*err)
 				return true;
 			// todo : process err
 		}
 
-		op = regulate(op, player_red);
+		int op_error = 0;
+		op = regulate(op, player_red, op_error);
 
 		if (op.type == -1)
 		{
@@ -457,6 +512,7 @@ public:
 		}
 		else if (op.type == -2)
 		{
+			//std::cerr << "Error Type: " << op_error << std::endl;
 			json event = reportEvent(0, player_red.pos);
 			event["CurrentEvent"] = "ERROR";
 			m_root.push_back(event);
@@ -551,6 +607,13 @@ public:
 		
 		if(player_id == 1)
 		{
+			/*
+			std::cerr << "turn: " << turn << std::endl;
+			std::cerr << player_red.pos.x << " " << player_red.pos.y << " " << player_red.pos.z << std::endl;
+			std::cerr << player_blue.pos.x << " " << player_blue.pos.y << " " << player_blue.pos.z << std::endl;
+			std::cerr << map[player_red.pos].PlayerIdx << " " << map[player_blue.pos].PlayerIdx << std::endl;
+			*/
+
 			op = get_operation(player_blue, player_map(player_blue));
 			send_operation(op);
 		}
@@ -558,7 +621,16 @@ public:
 			op = get_operation_opponent();
 		else // judge -1
 		{
+			/*
+			std::cerr << "turn: " << turn << std::endl;
+			std::cerr << player_red.pos.x << " " << player_red.pos.y << " " << player_red.pos.z << std::endl;
+			std::cerr << player_blue.pos.x << " " << player_blue.pos.y << " " << player_blue.pos.z << std::endl;
+			std::cerr << map[player_red.pos].PlayerIdx << " " << map[player_blue.pos].PlayerIdx << std::endl;
+			*/
+
 			op = judge_proc(1, err);
+			//std::cerr << "Target: " << op.target.x << ' ' << op.target.y << ' ' << op.target.z << '\n';
+
 			if(*err)
 			{
 				*err *= -1;
@@ -566,7 +638,7 @@ public:
 			}
 		}
 		
-		op = regulate(op, player_blue);
+		op = regulate(op, player_blue, op_error);
 		if (op.type == -1)
 		{
 			json event = reportEvent(1, player_blue.pos);
@@ -575,6 +647,7 @@ public:
 		}
 		else if (op.type == -2)
 		{
+			//std::cerr << "Error Type: " << op_error << std::endl;
 			json event = reportEvent(1, player_blue.pos);
 			event["CurrentEvent"] = "ERROR";
 			m_root.push_back(event);
@@ -686,8 +759,8 @@ public:
 		if (player_blue.hp <= 0 || player_red.hp <= 0)
 			return true;
 
+		//std::cerr << "\n";
 		return false;
-
 	}
 public:
 	Game() : player_id (-2) // -2 stands for uninitialized
