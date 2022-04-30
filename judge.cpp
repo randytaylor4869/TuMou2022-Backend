@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
         nlohmann::json list;
         list["InitialState"] = game->m_init;
         list["list"] = game->m_root;
-        std::cout << list.dump(-1); 
+        std::cout << list.dump(4); 
     }
     else
     {
