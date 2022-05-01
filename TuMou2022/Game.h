@@ -53,7 +53,8 @@ class Game
 	map.enemy_unit.push_back(&player_blue);
 	map.enemy_num+=2;
 	*/
-	int turn;
+	int turn = 1; // 回合数
+	int hurt = 10; // 缩圈伤害
 public:
 	json m_root;//用于写json向前端汇报的根节点
 	json m_init;
@@ -733,15 +734,23 @@ public:
 			return true;
 
 		//缩圈
-		if (turn >= 0.75 * TURN_COUNT )
+		if (turn <= 30 && turn % 5 == 0) // 30回合之前：回合数为5的倍数时缩圈
 		{
 			if (map.nowSize)
 				map.nowSize--;
 		}
+		else if(turn % 2 == 0) // 30回合之后：偶数回合缩圈
+		{
+			if (map.nowSize)
+				map.nowSize--;
+		}
+
+		if (!map.nowSize) 	//全部缩圈后，伤害每回合提高5
+			hurt += 5;
+		
 		//缩圈伤害
 		if (map.getDistance(player_red.pos, Coordinate(MAP_SIZE-1, MAP_SIZE-1, MAP_SIZE-1)) > map.nowSize)
 		{
-			int hurt = 10;// TODO: 调整这个值，随时间变化？
 			player_red.hp -= hurt; 
 			json event = reportEvent(0, player_red.pos);
 			event["CurrentEvent"] = "BOUNDARYHURT";
@@ -751,7 +760,6 @@ public:
 		}
 		if (map.getDistance(player_blue.pos, Coordinate(MAP_SIZE-1, MAP_SIZE-1, MAP_SIZE-1)) > map.nowSize)
 		{
-			int hurt = 10;// TODO: 调整这个值，随时间变化？
 			player_blue.hp -= hurt; 
 			json event = reportEvent(1, player_blue.pos);
 			event["CurrentEvent"] = "BOUNDARYHURT";
