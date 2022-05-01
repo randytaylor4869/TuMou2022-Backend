@@ -734,10 +734,11 @@ public:
 			return true;
 
 		//缩圈
-		if (turn <= 30 && turn % 5 == 0) // 30回合之前：回合数为5的倍数时缩圈
+		if (turn <= 30) // 30回合之前：回合数为5的倍数时缩圈
 		{
-			if (map.nowSize)
-				map.nowSize--;
+			if(turn % 5 == 0)
+				if (map.nowSize)
+					map.nowSize--;
 		}
 		else if(turn % 2 == 0) // 30回合之后：偶数回合缩圈
 		{
