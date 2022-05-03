@@ -77,7 +77,7 @@ public:
 						int mineidx = -1;
 						int barrieridx = -1;
 						if (rand() % 10 == 1) { mineidx = mymap.mine_num; }				//十分之一概率， TO DO：修改数值
-						else if (rand() % 10 == 2) { barrieridx = mymap.barrier_num; }	//十分之一概率， TO DO：修改数值
+						else if (i != MAP_SIZE-1 && rand() % 10 == 2) { barrieridx = mymap.barrier_num; }	//十分之一概率， TO DO：修改数值
 
 						if (mymap.isValid(i, j, k))
 						{
