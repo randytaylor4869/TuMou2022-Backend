@@ -301,7 +301,7 @@ public:
 				err = -2;
                 return ret;
             }
-			if (map.getDistance(op.target, p.pos) > p.move_range)
+			if (map.getDistance(op.target, p.pos) > p.sight_range || map.getDistance(op.target, p.pos) > p.move_range)
 			{
 				err = -3;
 				return ret;
@@ -324,7 +324,7 @@ public:
 				err = -5;
 				return ret;
 			}
-			if (map.getDistance(op.target, p.pos) > p.attack_range)
+			if (map.getDistance(op.target, p.pos) > p.sight_range || map.getDistance(op.target, p.pos) > p.attack_range)
 			{
 				err = -6;
 				return ret;
