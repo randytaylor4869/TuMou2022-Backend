@@ -42,8 +42,8 @@ class Game
 {
 	const int player_id;
 
-	Player player_red = Player(0, MAP_SIZE-1- ((MAP_SIZE -1)/ 2), 2 * MAP_SIZE - 2, ((MAP_SIZE - 1) / 2));
-	Player player_blue = Player(1, 2*MAP_SIZE - 2 - ((MAP_SIZE - 1) / 2), 0, MAP_SIZE - 1 + ((MAP_SIZE - 1) / 2));
+	Player player_red = Player(0, MAP_SIZE - 1, 2 * MAP_SIZE - 2, 0);
+	Player player_blue = Player(1, MAP_SIZE - 1, 0, 2 * MAP_SIZE - 2);
 
 	Map map;
 	Map mymap; // 用于player_map()函数中返回值，向选手传参
@@ -85,31 +85,31 @@ public:
 							{
 								mymap.data[i][j][k] = Point(i, j, k, mineidx, barrieridx, 1);
 								mymap.data[i][j][k].isvalid = 1;
-								if (j != MAP_SIZE - 1)
+								if (! (i==j && j==k))
 								{
-									mymap.data[2 * MAP_SIZE - 2 - k][2 * MAP_SIZE - 2 - j][2 * MAP_SIZE - 2 - i] = 
-										Point(2 * MAP_SIZE - 2 - k, 2 * MAP_SIZE - 2 - j, 2 * MAP_SIZE - 2 - i, (mineidx >= 0 ? mineidx + 1 : -1), (barrieridx >= 0 ? barrieridx + 1 : -1), 1);
-									mymap.data[2 * MAP_SIZE - 2 - k][2 * MAP_SIZE - 2 - j][2 * MAP_SIZE - 2 - i].isvalid = 1;
+									mymap.data[2 * MAP_SIZE - 2 - i][2 * MAP_SIZE - 2 - j][2 * MAP_SIZE - 2 - k] =
+										Point(2 * MAP_SIZE - 2 - i, 2 * MAP_SIZE - 2 - j, 2 * MAP_SIZE - 2 - k, (mineidx >= 0 ? mineidx + 1 : -1), (barrieridx >= 0 ? barrieridx + 1 : -1), 1);
+									mymap.data[2 * MAP_SIZE - 2 - i][2 * MAP_SIZE - 2 - j][2 * MAP_SIZE - 2 - k].isvalid = 1;
 								}
-								
+
 								if (mineidx >= 0)
 								{
 									mymap.mine.push_back(Mine(MINE_NUM, Coordinate(i, j, k)));
 									mymap.data[i][j][k].MineIdx = mymap.mine_num++;
-									if (j != MAP_SIZE - 1)
+									if (!(i == j && j == k))
 									{
-										mymap.data[2 * MAP_SIZE - 2 - k][2 * MAP_SIZE - 2 - j][2 * MAP_SIZE - 2 - i].MineIdx = mymap.mine_num++;
-										mymap.mine.push_back(Mine(MINE_NUM, Coordinate(2 * MAP_SIZE - 2 - k, 2 * MAP_SIZE - 2 - j, 2 * MAP_SIZE - 2 - i)));
+										mymap.data[2 * MAP_SIZE - 2 - i][2 * MAP_SIZE - 2 - j][2 * MAP_SIZE - 2 - k].MineIdx = mymap.mine_num++;
+										mymap.mine.push_back(Mine(MINE_NUM, Coordinate(2 * MAP_SIZE - 2 - i, 2 * MAP_SIZE - 2 - j, 2 * MAP_SIZE - 2 - k)));
 									}
 								}
 								if (barrieridx >= 0)
 								{
 									mymap.barrier.push_back(Coordinate(i, j, k));
 									mymap.data[i][j][k].BarrierIdx = mymap.barrier_num++;
-									if (j != MAP_SIZE - 1)
+									if (!(i == j && j == k))
 									{
-										mymap.data[2 * MAP_SIZE - 2 - k][2 * MAP_SIZE - 2 - j][2 * MAP_SIZE - 2 - i].BarrierIdx = mymap.barrier_num++;
-										mymap.barrier.push_back(Coordinate(2 * MAP_SIZE - 2 - k, 2 * MAP_SIZE - 2 - j, 2 * MAP_SIZE - 2 - i));
+										mymap.data[2 * MAP_SIZE - 2 - i][2 * MAP_SIZE - 2 - j][2 * MAP_SIZE - 2 - k].BarrierIdx = mymap.barrier_num++;
+										mymap.barrier.push_back(Coordinate(2 * MAP_SIZE - 2 - i, 2 * MAP_SIZE - 2 - j, 2 * MAP_SIZE - 2 - k));
 									}
 								}
 							}
