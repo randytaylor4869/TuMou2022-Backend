@@ -84,10 +84,14 @@ public:
 							if (mymap.data[i][j][k].isvalid != 1)
 							{
 								mymap.data[i][j][k] = Point(i, j, k, mineidx, barrieridx, 1);
-								if (j != MAP_SIZE - 1)
-									mymap.data[2 * MAP_SIZE - 2 - k][2 * MAP_SIZE - 2 - j][2 * MAP_SIZE - 2 - i] = Point(i, j, k, mineidx + 1, barrieridx + 1, 1);
 								mymap.data[i][j][k].isvalid = 1;
-								mymap.data[2 * MAP_SIZE - 2 - k][2 * MAP_SIZE - 2 - j][2 * MAP_SIZE - 2 - i].isvalid = 1;
+								if (j != MAP_SIZE - 1)
+								{
+									mymap.data[2 * MAP_SIZE - 2 - k][2 * MAP_SIZE - 2 - j][2 * MAP_SIZE - 2 - i] = 
+										Point(2 * MAP_SIZE - 2 - k, 2 * MAP_SIZE - 2 - j, 2 * MAP_SIZE - 2 - i, (mineidx >= 0 ? mineidx + 1 : -1), (barrieridx >= 0 ? barrieridx + 1 : -1), 1);
+									mymap.data[2 * MAP_SIZE - 2 - k][2 * MAP_SIZE - 2 - j][2 * MAP_SIZE - 2 - i].isvalid = 1;
+								}
+								
 								if (mineidx >= 0)
 								{
 									mymap.mine.push_back(Mine(MINE_NUM, Coordinate(i, j, k)));
