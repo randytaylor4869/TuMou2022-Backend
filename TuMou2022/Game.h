@@ -69,7 +69,7 @@ public:
 		mymap.enemy_num = 0;
 		srand(seed);
 		for (int i = 0; i < 2 * MAP_SIZE - 1; i++) {
-			for (int j = 0; j < MAP_SIZE; j++) {
+			for (int j = 0; j < 2 * MAP_SIZE - 1; j++) {
 				for (int k = 0; k < 2 * MAP_SIZE - 1; k++) {
 					if (mymap.isValid(i, j, k))
 					{
@@ -77,27 +77,27 @@ public:
 						int mineidx = -1;
 						int barrieridx = -1;
 						if (rand() % 10 == 1) { mineidx = mymap.mine_num; }				//十分之一概率， TO DO：修改数值
-						else if (i != MAP_SIZE - 1 && rand() % 10 == 2) { barrieridx = mymap.barrier_num; }	//十分之一概率， TO DO：修改数值
+						else if (i != MAP_SIZE-1 && rand() % 10 == 2) { barrieridx = mymap.barrier_num; }	//十分之一概率， TO DO：修改数值
 
 						if (mymap.isValid(i, j, k))
 						{
 							mymap.data[i][j][k] = Point(i, j, k, mineidx, barrieridx, 1);
-							mymap.data[i][2 * MAP_SIZE - 2 - j][k] = Point(i, j, k, mineidx + 1, barrieridx + 1, 1);
 							mymap.data[i][j][k].isvalid = 1;
-							mymap.data[i][2 * MAP_SIZE - 2 - j][k].isvalid = 1;
 							if (mineidx >= 0)
 							{
 								mymap.mine.push_back(Mine(MINE_NUM, Coordinate(i, j, k)));
-								mymap.data[i][j][k].MineIdx = mymap.mine_num++;
-								mymap.data[i][2 * MAP_SIZE - 2 - j][k].MineIdx = mymap.mine_num++;
+								mymap.data[i][j][k].MineIdx = mymap.mine_num;
+								mymap.mine_num++;
 							}
 							if (barrieridx >= 0)
 							{
 								mymap.barrier.push_back(Coordinate(i, j, k));
-								mymap.data[i][j][k].BarrierIdx = mymap.barrier_num++;
-								mymap.data[i][2 * MAP_SIZE - 2 - j][k].BarrierIdx = mymap.barrier_num++;
+								mymap.data[i][j][k].BarrierIdx = mymap.barrier_num;
+								mymap.barrier_num++;
 							}
 						}
+
+
 					}
 				}
 			}
