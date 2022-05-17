@@ -42,11 +42,11 @@ class Game
 {
 	const int player_id;
 
-	Player player_red = Player(0, MAP_SIZE - 1, 2 * MAP_SIZE - 2, 0);   
-	Player player_blue = Player(1, MAP_SIZE - 1, 0, 2 * MAP_SIZE - 2);
+	Player player_red = Player(0, MAP_SIZE-1- ((MAP_SIZE -1)/ 2), 2 * MAP_SIZE - 2, ((MAP_SIZE - 1) / 2));
+	Player player_blue = Player(1, 2*MAP_SIZE - 2 - ((MAP_SIZE - 1) / 2), 0, MAP_SIZE - 1 + ((MAP_SIZE - 1) / 2));
 
 	Map map;
-    Map mymap; // 用于player_map()函数中返回值，向选手传参
+	Map mymap; // 用于player_map()函数中返回值，向选手传参
 
 	/*暂时去掉
 	map.enemy_unit.push_back(&player_red);
@@ -76,28 +76,40 @@ public:
 						//随机判断是否有资源点、障碍物
 						int mineidx = -1;
 						int barrieridx = -1;
-						if (rand() % 10 == 1) { mineidx = mymap.mine_num; }				//十分之一概率， TO DO：修改数值
-						else if (i != MAP_SIZE-1 && rand() % 10 == 2) { barrieridx = mymap.barrier_num; }	//十分之一概率， TO DO：修改数值
+						if (rand() % 30 == 1) { mineidx = mymap.mine_num; }				//三十分之一概率， TO DO：修改数值
+						else if (i != MAP_SIZE - 1 && rand() % 10 == 2) { barrieridx = mymap.barrier_num; }	//十分之一概率， TO DO：修改数值
 
 						if (mymap.isValid(i, j, k))
 						{
-							mymap.data[i][j][k] = Point(i, j, k, mineidx, barrieridx, 1);
-							mymap.data[i][j][k].isvalid = 1;
-							if (mineidx >= 0)
+							if (mymap.data[i][j][k].isvalid != 1)
 							{
-								mymap.mine.push_back(Mine(MINE_NUM, Coordinate(i, j, k)));
-								mymap.data[i][j][k].MineIdx = mymap.mine_num;
-								mymap.mine_num++;
-							}
-							if (barrieridx >= 0)
-							{
-								mymap.barrier.push_back(Coordinate(i, j, k));
-								mymap.data[i][j][k].BarrierIdx = mymap.barrier_num;
-								mymap.barrier_num++;
+								mymap.data[i][j][k] = Point(i, j, k, mineidx, barrieridx, 1);
+								if (j != MAP_SIZE - 1)
+									mymap.data[2 * MAP_SIZE - 2 - k][2 * MAP_SIZE - 2 - j][2 * MAP_SIZE - 2 - i] = Point(i, j, k, mineidx + 1, barrieridx + 1, 1);
+								mymap.data[i][j][k].isvalid = 1;
+								mymap.data[2 * MAP_SIZE - 2 - k][2 * MAP_SIZE - 2 - j][2 * MAP_SIZE - 2 - i].isvalid = 1;
+								if (mineidx >= 0)
+								{
+									mymap.mine.push_back(Mine(MINE_NUM, Coordinate(i, j, k)));
+									mymap.data[i][j][k].MineIdx = mymap.mine_num++;
+									if (j != MAP_SIZE - 1)
+									{
+										mymap.data[2 * MAP_SIZE - 2 - k][2 * MAP_SIZE - 2 - j][2 * MAP_SIZE - 2 - i].MineIdx = mymap.mine_num++;
+										mymap.mine.push_back(Mine(MINE_NUM, Coordinate(2 * MAP_SIZE - 2 - k, 2 * MAP_SIZE - 2 - j, 2 * MAP_SIZE - 2 - i)));
+									}
+								}
+								if (barrieridx >= 0)
+								{
+									mymap.barrier.push_back(Coordinate(i, j, k));
+									mymap.data[i][j][k].BarrierIdx = mymap.barrier_num++;
+									if (j != MAP_SIZE - 1)
+									{
+										mymap.data[2 * MAP_SIZE - 2 - k][2 * MAP_SIZE - 2 - j][2 * MAP_SIZE - 2 - i].BarrierIdx = mymap.barrier_num++;
+										mymap.barrier.push_back(Coordinate(2 * MAP_SIZE - 2 - k, 2 * MAP_SIZE - 2 - j, 2 * MAP_SIZE - 2 - i));
+									}
+								}
 							}
 						}
-
-
 					}
 				}
 			}
@@ -167,9 +179,9 @@ public:
 				}
 			}
 		}*/
-		if(player.id == 0)
+		if (player.id == 0)
 		{
-			if(mymap.getDistance(player.pos, player_blue.pos) <= mymap.viewSize - 1)
+			if (mymap.getDistance(player.pos, player_blue.pos) <= mymap.viewSize - 1)
 			{
 				mymap.enemy_unit.push_back(player_blue);
 				mymap.data[player_blue.pos.x][player_blue.pos.y][player_blue.pos.z].PlayerIdx = 1;
@@ -178,7 +190,7 @@ public:
 		}
 		else
 		{
-			if(mymap.getDistance(player.pos, player_red.pos) <= mymap.viewSize - 1)
+			if (mymap.getDistance(player.pos, player_red.pos) <= mymap.viewSize - 1)
 			{
 				mymap.enemy_unit.push_back(player_red);
 				mymap.data[player_red.pos.x][player_red.pos.y][player_red.pos.z].PlayerIdx = 0;
@@ -278,7 +290,7 @@ public:
 
 	//Map limited_map = Map(map,player_red);		//返回玩家p的视野地图
 
-	Operation regulate(Operation op, const Player& p, int &err)
+	Operation regulate(Operation op, const Player& p, int& err)
 	{
 		Operation ret;
 		ret.type = -2;
@@ -289,7 +301,7 @@ public:
 		// 检查type在范围内
 		if (op.type < -1 || op.type > 1)
 		{
-			err =  -1;
+			err = -1;
 			return ret;
 		}
 
@@ -297,21 +309,21 @@ public:
 		if (op.type == 0)
 		{
 			if (!map.isValid(op.target))
-            {
+			{
 				err = -2;
-                return ret;
-            }
+				return ret;
+			}
 			if (map.getDistance(op.target, p.pos) > p.sight_range || map.getDistance(op.target, p.pos) > p.move_range)
 			{
 				err = -3;
 				return ret;
 			}
-			if (map.data[op.target.x][op.target.y][op.target.z].BarrierIdx != -1 )
+			if (map.data[op.target.x][op.target.y][op.target.z].BarrierIdx != -1)
 			{
 				err = -4;
 				return ret;
 			}
-			if(map.data[op.target.x][op.target.y][op.target.z].PlayerIdx != -1 && map.data[op.target.x][op.target.y][op.target.z].PlayerIdx != p.id)
+			if (map.data[op.target.x][op.target.y][op.target.z].PlayerIdx != -1 && map.data[op.target.x][op.target.y][op.target.z].PlayerIdx != p.id)
 			{
 				err = 4;
 				return ret;
@@ -343,7 +355,7 @@ public:
 
 		// 检查升级时机（回合数）是否合法
 		// TBD
-        //std::cerr << "valid move " << op.type << ' ' << map.getDistance(p.pos,op.target) << "\n";
+		//std::cerr << "valid move " << op.type << ' ' << map.getDistance(p.pos,op.target) << "\n";
 		return op;
 	}
 
@@ -383,7 +395,7 @@ public:
 	Operation get_operation_opponent()
 	{
 		Operation op;
-		char *s = bot_recv();
+		char* s = bot_recv();
 		sscanf(s, "%d %d %d %d %d %d", &op.type, &op.target.x, &op.target.y, &op.target.z, &op.upgrade, &op.upgrade_type);
 		free(s);
 		return op;
@@ -400,12 +412,12 @@ public:
 		int o_len;
 		char* s = bot_judge_recv(current_player, &o_len, 2000);
 		*err = 0;
-		if(s == 0)
+		if (s == 0)
 		{
 			*err = o_len;
 			return Operation();
 		}
-		bot_judge_send(current_player^1, s);
+		bot_judge_send(current_player ^ 1, s);
 		Operation op;
 		sscanf(s, "%d %d %d %d %d %d", &op.type, &op.target.x, &op.target.y, &op.target.z, &op.upgrade, &op.upgrade_type);
 		free(s);
@@ -469,7 +481,7 @@ public:
 		//Map(map,player_red);
 
 		//op = get_operation_red(player_red, tmp);
-		if(player_id == 0)
+		if (player_id == 0)
 		{
 			/*
 			std::cerr << "turn: " << turn << std::endl;
@@ -478,10 +490,10 @@ public:
 			std::cerr << map[player_red.pos].PlayerIdx << " " << map[player_blue.pos].PlayerIdx << std::endl;
 			*/
 
-			op = get_operation(player_red, player_map(player_red)); 
+			op = get_operation(player_red, player_map(player_red));
 			send_operation(op);
 		}
-		else if(player_id == 1)
+		else if (player_id == 1)
 		{
 			op = get_operation_opponent();
 		}
@@ -497,7 +509,7 @@ public:
 			op = judge_proc(0, err);
 			//std::cerr << "Target: " << op.target.x << ' ' << op.target.y << ' ' << op.target.z << '\n';
 
-			if(*err)
+			if (*err)
 				return true;
 			// todo : process err
 		}
@@ -563,8 +575,8 @@ public:
 			if (op.upgrade_type >= 0 && op.upgrade_type <= 5) // 检查升级类型是否合法
 				if (player_red.mines >= UPGRADE_COST[op.upgrade_type]) // 检查资源是否足够
 				{
-					if(!(op.upgrade_type == 2 && player_red.mine_speed >= 30) &&
-					   !(op.upgrade_type == 5 && player_red.at >= 50) )
+					if (!(op.upgrade_type == 2 && player_red.mine_speed >= 30) &&
+						!(op.upgrade_type == 5 && player_red.at >= 50))
 					{
 						upgrade(op.upgrade_type, player_red);
 						json event = reportEvent(0, player_red.pos);
@@ -605,8 +617,8 @@ public:
 
 		// get operation from player blue(1)
 		//real: op = get_operation_blue(player_red, Map(map,player_blue));
-		
-		if(player_id == 1)
+
+		if (player_id == 1)
 		{
 			/*
 			std::cerr << "turn: " << turn << std::endl;
@@ -618,7 +630,7 @@ public:
 			op = get_operation(player_blue, player_map(player_blue));
 			send_operation(op);
 		}
-		else if(player_id == 0)
+		else if (player_id == 0)
 			op = get_operation_opponent();
 		else // judge -1
 		{
@@ -632,13 +644,13 @@ public:
 			op = judge_proc(1, err);
 			//std::cerr << "Target: " << op.target.x << ' ' << op.target.y << ' ' << op.target.z << '\n';
 
-			if(*err)
+			if (*err)
 			{
 				*err *= -1;
 				return true;
 			}
 		}
-		
+
 		op = regulate(op, player_blue, op_error);
 		if (op.type == -1)
 		{
@@ -694,8 +706,8 @@ public:
 			if (op.upgrade_type >= 0 && op.upgrade_type <= 5) // 检查升级类型是否合法
 				if (player_blue.mines >= UPGRADE_COST[op.upgrade_type]) // 检查资源是否足够
 				{
-					if(!(op.upgrade_type == 2 && player_blue.mine_speed >= 30) &&
-					   !(op.upgrade_type == 5 && player_blue.at >= 50) )
+					if (!(op.upgrade_type == 2 && player_blue.mine_speed >= 30) &&
+						!(op.upgrade_type == 5 && player_blue.at >= 50))
 					{
 						upgrade(op.upgrade_type, player_blue);
 						json event = reportEvent(1, player_blue.pos);
@@ -736,11 +748,11 @@ public:
 		//缩圈
 		if (turn <= 30) // 30回合之前：回合数为5的倍数时缩圈
 		{
-			if(turn % 5 == 0)
+			if (turn % 5 == 0)
 				if (map.nowSize)
 					map.nowSize--;
 		}
-		else if(turn % 2 == 0) // 30回合之后：偶数回合缩圈
+		else if (turn % 2 == 0) // 30回合之后：偶数回合缩圈
 		{
 			if (map.nowSize)
 				map.nowSize--;
@@ -748,20 +760,20 @@ public:
 
 		if (!map.nowSize) 	//全部缩圈后，伤害每回合提高5
 			hurt += 5;
-		
+
 		//缩圈伤害
-		if (map.getDistance(player_red.pos, Coordinate(MAP_SIZE-1, MAP_SIZE-1, MAP_SIZE-1)) > map.nowSize)
+		if (map.getDistance(player_red.pos, Coordinate(MAP_SIZE - 1, MAP_SIZE - 1, MAP_SIZE - 1)) > map.nowSize)
 		{
-			player_red.hp -= hurt; 
+			player_red.hp -= hurt;
 			json event = reportEvent(0, player_red.pos);
 			event["CurrentEvent"] = "BOUNDARYHURT";
 			event["BoundaryHurt"] = hurt;
 			m_root.push_back(event);
-			
+
 		}
-		if (map.getDistance(player_blue.pos, Coordinate(MAP_SIZE-1, MAP_SIZE-1, MAP_SIZE-1)) > map.nowSize)
+		if (map.getDistance(player_blue.pos, Coordinate(MAP_SIZE - 1, MAP_SIZE - 1, MAP_SIZE - 1)) > map.nowSize)
 		{
-			player_blue.hp -= hurt; 
+			player_blue.hp -= hurt;
 			json event = reportEvent(1, player_blue.pos);
 			event["CurrentEvent"] = "BOUNDARYHURT";
 			event["BoundaryHurt"] = hurt;
@@ -776,13 +788,13 @@ public:
 		return false;
 	}
 public:
-	Game() : player_id (-2) // -2 stands for uninitialized
+	Game() : player_id(-2) // -2 stands for uninitialized
 	{
-		turn = 0; 
+		turn = 0;
 		init_json();
 		// TODO : replay output
 	}
-	Game(int x, int y) : player_id(x), map(buildMap(y)){
+	Game(int x, int y) : player_id(x), map(buildMap(y)) {
 		turn = 0;
 		init_json();
 	}
@@ -794,13 +806,13 @@ public:
 		for (turn = 1; turn <= TURN_COUNT; turn++)
 		{
 			//std::cerr << "turn" << turn << std::endl;
-            //std::cerr << player_red.hp << ' '<< player_blue.hp << std::endl;
-            //std::cerr << map.getDistance(player_red.pos, Coordinate(MAP_SIZE-1, MAP_SIZE-1, MAP_SIZE-1)) << ' ' << map.getDistance(player_blue.pos, Coordinate(MAP_SIZE-1, MAP_SIZE-1, MAP_SIZE-1)) << ' ' << map.nowSize << std::endl;
-			
+			//std::cerr << player_red.hp << ' '<< player_blue.hp << std::endl;
+			//std::cerr << map.getDistance(player_red.pos, Coordinate(MAP_SIZE-1, MAP_SIZE-1, MAP_SIZE-1)) << ' ' << map.getDistance(player_blue.pos, Coordinate(MAP_SIZE-1, MAP_SIZE-1, MAP_SIZE-1)) << ' ' << map.nowSize << std::endl;
+
 			if (Update(&err))
 				break;
 		}
-		if(err > 0) // 红方出错结束
+		if (err > 0) // 红方出错结束
 		{
 			std::cerr << "Player red error. Code : " << err << std::endl;
 			//todo: json output
