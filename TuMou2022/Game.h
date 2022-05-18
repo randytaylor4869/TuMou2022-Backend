@@ -42,9 +42,9 @@ class Game
 {
 	const int player_id;
 
-	Player player_red = Player(0, MAP_SIZE-1- ((MAP_SIZE -1)/ 2), 2 * MAP_SIZE - 2, ((MAP_SIZE - 1) / 2));
-	Player player_blue = Player(1, 2*MAP_SIZE - 2 - ((MAP_SIZE - 1) / 2), 0, MAP_SIZE - 1 + ((MAP_SIZE - 1) / 2));
-
+	Player player_red = Player(0, MAP_SIZE - 1, 2 * MAP_SIZE - 2, 0);   
+	Player player_blue = Player(1, MAP_SIZE - 1, 0, 2 * MAP_SIZE - 2);
+	
 	Map map;
 	Map mymap; // 用于player_map()函数中返回值，向选手传参
 
@@ -758,11 +758,11 @@ public:
 		}
 		else if (turn % 2 == 0) // 30回合之后：偶数回合缩圈
 		{
-			if (map.nowSize)
+			if (map.nowSize >= 0)
 				map.nowSize--;
 		}
 
-		if (!map.nowSize) 	//全部缩圈后，伤害每回合提高5
+		if (map.nowSize < 0) 	//全部缩圈后，伤害每回合提高5
 			hurt += 5;
 
 		//缩圈伤害
