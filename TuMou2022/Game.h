@@ -76,7 +76,7 @@ public:
 						//随机判断是否有资源点、障碍物
 						int mineidx = -1;
 						int barrieridx = -1;
-						if (rand() % 30 == 1) { mineidx = mymap.mine_num; }				//三十分之一概率， TO DO：修改数值
+						if (rand() % 10 == 1) { mineidx = mymap.mine_num; }				//三十分之一概率， TO DO：修改数值
 						else if (i != MAP_SIZE - 1 && rand() % 10 == 2 )
 						{
 							if(!(Coordinate(i,j,k) == player_red.pos || Coordinate(i,j,k) == player_blue.pos
