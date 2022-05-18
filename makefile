@@ -21,10 +21,10 @@ player1: lib_bot/Bot.cpp player1.cpp $(header)
 player2: lib_bot/Bot.cpp player2.cpp $(header)
 	g++ -D __local_test__ lib_bot/Bot.cpp player2.cpp -o $@
 
-run:
+run: judge player1 player2
 	@ "$(JUDGE_EXEC)" $(JUDGE_ARGS) "$(PLAYER1_CMD)" "$(PLAYER2_CMD)" $(LOGS)
 
-runsolo:
+runsolo: judge player1
 	@ "$(JUDGE_EXEC)" $(JUDGE_ARGS) "$(PLAYER1_CMD)" "$(PLAYER1_CMD)" $(LOGS)
 
 clean: clean_exec clean_log
