@@ -42,9 +42,9 @@ class Game
 {
 	const int player_id;
 
-	Player player_red = Player(0, MAP_SIZE - 1, 2 * MAP_SIZE - 2, 0);
+	Player player_red = Player(0, MAP_SIZE - 1, 2 * MAP_SIZE - 2, 0);   
 	Player player_blue = Player(1, MAP_SIZE - 1, 0, 2 * MAP_SIZE - 2);
-
+	
 	Map map;
 	Map mymap; // 用于player_map()函数中返回值，向选手传参
 
@@ -76,8 +76,14 @@ public:
 						//随机判断是否有资源点、障碍物
 						int mineidx = -1;
 						int barrieridx = -1;
-						if (rand() % 30 == 1) { mineidx = mymap.mine_num; }				//三十分之一概率， TO DO：修改数值
-						else if (i != MAP_SIZE - 1 && rand() % 10 == 2) { barrieridx = mymap.barrier_num; }	//十分之一概率， TO DO：修改数值
+						if (rand() % 10 == 1) { mineidx = mymap.mine_num; }				//三十分之一概率， TO DO：修改数值
+						else if (i != MAP_SIZE - 1 && rand() % 10 == 2 )
+						{
+							if(!(Coordinate(i,j,k) == player_red.pos || Coordinate(i,j,k) == player_blue.pos
+								|| Coordinate(2 * MAP_SIZE - 2 - k, 2 * MAP_SIZE - 2 - j, 2 * MAP_SIZE - 2 - i) == player_red.pos
+								|| Coordinate(2 * MAP_SIZE - 2 - k, 2 * MAP_SIZE - 2 - j, 2 * MAP_SIZE - 2 - i) == player_blue.pos))
+							{ barrieridx = mymap.barrier_num; }	//十分之一概率， TO DO：修改数值
+						}
 
 						if (mymap.isValid(i, j, k))
 						{
@@ -758,11 +764,11 @@ public:
 		}
 		else if (turn % 2 == 0) // 30回合之后：偶数回合缩圈
 		{
-			if (map.nowSize)
+			if (map.nowSize >= 0)
 				map.nowSize--;
 		}
 
-		if (!map.nowSize) 	//全部缩圈后，伤害每回合提高5
+		if (map.nowSize < 0) 	//全部缩圈后，伤害每回合提高5
 			hurt += 5;
 
 		//缩圈伤害
@@ -775,6 +781,11 @@ public:
 			m_root.push_back(event);
 
 		}
+		
+		//判断存活状态
+		if (player_blue.hp <= 0 || player_red.hp <= 0)
+			return true;
+		
 		if (map.getDistance(player_blue.pos, Coordinate(MAP_SIZE - 1, MAP_SIZE - 1, MAP_SIZE - 1)) > map.nowSize)
 		{
 			player_blue.hp -= hurt;
