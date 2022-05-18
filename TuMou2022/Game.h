@@ -77,7 +77,13 @@ public:
 						int mineidx = -1;
 						int barrieridx = -1;
 						if (rand() % 30 == 1) { mineidx = mymap.mine_num; }				//三十分之一概率， TO DO：修改数值
-						else if (i != MAP_SIZE - 1 && rand() % 10 == 2) { barrieridx = mymap.barrier_num; }	//十分之一概率， TO DO：修改数值
+						else if (i != MAP_SIZE - 1 && rand() % 10 == 2 )
+						{
+							if(!(Coordinate(i,j,k) == player_red.pos || Coordinate(i,j,k) == player_blue.pos
+								|| Coordinate(2 * MAP_SIZE - 2 - k, 2 * MAP_SIZE - 2 - j, 2 * MAP_SIZE - 2 - i) == player_red.pos
+								|| Coordinate(2 * MAP_SIZE - 2 - k, 2 * MAP_SIZE - 2 - j, 2 * MAP_SIZE - 2 - i) == player_blue.pos))
+							{ barrieridx = mymap.barrier_num; }	//十分之一概率， TO DO：修改数值
+						}
 
 						if (mymap.isValid(i, j, k))
 						{
@@ -775,6 +781,11 @@ public:
 			m_root.push_back(event);
 
 		}
+		
+		//判断存活状态
+		if (player_blue.hp <= 0 || player_red.hp <= 0)
+			return true;
+		
 		if (map.getDistance(player_blue.pos, Coordinate(MAP_SIZE - 1, MAP_SIZE - 1, MAP_SIZE - 1)) > map.nowSize)
 		{
 			player_blue.hp -= hurt;
