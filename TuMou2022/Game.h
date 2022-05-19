@@ -80,8 +80,8 @@ public:
 						else if (i != MAP_SIZE - 1 && rand() % 10 == 2 )
 						{
 							if(!(Coordinate(i,j,k) == player_red.pos || Coordinate(i,j,k) == player_blue.pos
-								|| Coordinate(2 * MAP_SIZE - 2 - k, 2 * MAP_SIZE - 2 - j, 2 * MAP_SIZE - 2 - i) == player_red.pos
-								|| Coordinate(2 * MAP_SIZE - 2 - k, 2 * MAP_SIZE - 2 - j, 2 * MAP_SIZE - 2 - i) == player_blue.pos))
+								|| Coordinate(2 * MAP_SIZE - 2 - i, 2 * MAP_SIZE - 2 - j, 2 * MAP_SIZE - 2 - k) == player_red.pos
+								|| Coordinate(2 * MAP_SIZE - 2 - i, 2 * MAP_SIZE - 2 - j, 2 * MAP_SIZE - 2 - k) == player_blue.pos))
 							{ barrieridx = mymap.barrier_num; }	//十分之一概率， TO DO：修改数值
 						}
 
@@ -91,13 +91,13 @@ public:
 							{
 								mymap.data[i][j][k] = Point(i, j, k, mineidx, barrieridx, 1);
 								mymap.data[i][j][k].isvalid = 1;
-								if (! (i==j && j==k))
+								if (!(i==j && j==k))
 								{
-									mymap.data[2 * MAP_SIZE - 2 - i][2 * MAP_SIZE - 2 - j][2 * MAP_SIZE - 2 - k] =
+									mymap.data[2 * MAP_SIZE - 2 - i][2 * MAP_SIZE - 2 - j][2 * MAP_SIZE - 2 - k] = 
 										Point(2 * MAP_SIZE - 2 - i, 2 * MAP_SIZE - 2 - j, 2 * MAP_SIZE - 2 - k, (mineidx >= 0 ? mineidx + 1 : -1), (barrieridx >= 0 ? barrieridx + 1 : -1), 1);
 									mymap.data[2 * MAP_SIZE - 2 - i][2 * MAP_SIZE - 2 - j][2 * MAP_SIZE - 2 - k].isvalid = 1;
 								}
-
+								
 								if (mineidx >= 0)
 								{
 									mymap.mine.push_back(Mine(MINE_NUM, Coordinate(i, j, k)));
